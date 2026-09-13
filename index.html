@@ -1,2502 +1,1911 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Battlelands — Season 1 Fan Recreation</title>
 
 <style>
-* {
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-user-select: none;
+*{
+    box-sizing:border-box;
+    -webkit-user-select:none;
+    user-select:none;
 }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #071b28;
-    font-family: Arial, Helvetica, sans-serif;
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#101d26;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-#gameWrap {
-    position: relative;
-    width: min(100vw, 1280px);
-    height: min(100vh, 720px);
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background: #80d7ed;
-    box-shadow: 0 0 60px rgba(0,0,0,.55);
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    max-width:1400px;
+    max-height:800px;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    background:#79cfe1;
+    box-shadow:0 0 60px #0008;
 }
 
-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    touch-action: none;
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    touch-action:none;
 }
 
-.ui {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+/* ---------------- MENU ---------------- */
+
+.menu{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
 }
 
-button {
-    pointer-events: auto;
-    border: 0;
-    cursor: pointer;
-    font-family: inherit;
+.logo{
+    position:absolute;
+    top:32px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    font-weight:1000;
+    font-style:italic;
+    letter-spacing:-4px;
+    color:#fff;
+    text-shadow:
+        0 7px 0 #23566d,
+        0 10px 15px #0005;
+    font-size:clamp(45px,7vw,88px);
+    line-height:.8;
 }
 
-.menuButton {
-    min-width: 240px;
-    padding: 18px 28px;
-    margin: 7px;
-    border-radius: 12px;
-    color: white;
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-shadow: 0 3px 0 rgba(0,0,0,.25);
+.logo span{
+    display:block;
+    color:#ffd340;
+    font-size:.72em;
+    letter-spacing:-2px;
+}
+
+.menuButtons{
+    position:absolute;
+    right:5%;
+    bottom:8%;
+    width:300px;
+    pointer-events:auto;
+}
+
+button{
+    border:0;
+    font-family:inherit;
+    font-weight:1000;
+    cursor:pointer;
+}
+
+.play{
+    width:100%;
+    height:72px;
+    border-radius:12px;
+    background:linear-gradient(#ffe05b,#f2a51f);
+    color:#fff;
+    font-size:30px;
+    text-shadow:0 3px #9b6815;
     box-shadow:
-        inset 0 -5px 0 rgba(0,0,0,.16),
-        0 5px 12px rgba(0,0,0,.22);
-    transition: transform .08s;
+        0 7px 0 #9b6815,
+        0 12px 20px #0005;
 }
 
-.menuButton:active {
-    transform: translateY(4px);
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,.16);
+.play:active{
+    transform:translateY(5px);
+    box-shadow:0 2px 0 #9b6815;
 }
 
-.play {
-    background: linear-gradient(#ffda48,#f2a51f);
+.menuSmall{
+    margin-top:16px;
+    width:100%;
+    height:48px;
+    border-radius:9px;
+    background:#294b5c;
+    color:#fff;
+    font-size:16px;
+    box-shadow:0 4px 0 #172f3a;
 }
 
-.blue {
-    background: linear-gradient(#58bdf1,#2585cf);
+#mainUI{
+    display:block;
 }
 
-.green {
-    background: linear-gradient(#68d36b,#39a84d);
+/* ---------------- HUD ---------------- */
+
+#hud{
+    display:none;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
 }
 
-.red {
-    background: linear-gradient(#ff7265,#d84335);
+.top{
+    position:absolute;
+    top:14px;
+    left:14px;
+    right:14px;
+    display:flex;
+    justify-content:space-between;
 }
 
-#menuButtons {
-    position: absolute;
-    right: 55px;
-    bottom: 42px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.panel{
+    background:#132d3ae6;
+    border:2px solid #ffffff24;
+    border-radius:9px;
+    padding:9px 14px;
+    color:white;
+    box-shadow:0 4px 12px #0003;
 }
 
-#topMenu {
-    position: absolute;
-    top: 20px;
-    left: 24px;
-    right: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.stat{
+    display:inline-block;
+    margin-right:22px;
 }
 
-.currency {
-    display: flex;
-    gap: 10px;
+.stat small{
+    display:block;
+    color:#8fb9c8;
+    font-size:11px;
+    font-weight:900;
 }
 
-.currencyBox {
-    background: rgba(17,35,47,.85);
-    color: white;
-    padding: 9px 16px;
-    border-radius: 10px;
-    font-weight: 900;
-    box-shadow: 0 3px 0 rgba(0,0,0,.2);
+.stat strong{
+    font-size:24px;
 }
 
-#passBack,
-#shopBack,
-#resultUI,
-#touchControls {
-    display: none;
+#weaponPanel{
+    position:absolute;
+    left:15px;
+    bottom:15px;
+    width:245px;
+    color:#fff;
 }
 
-#passBack,
-#shopBack {
-    position: absolute;
-    top: 24px;
-    left: 24px;
+.weaponName{
+    font-size:17px;
+    color:#ffe15a;
 }
 
-.smallButton {
-    padding: 12px 20px;
-    border-radius: 9px;
-    background: #263f50;
-    color: white;
-    font-weight: 900;
-    font-size: 16px;
-    box-shadow: inset 0 -4px rgba(0,0,0,.18);
+.ammo{
+    font-size:31px;
+    margin-top:3px;
 }
 
-#resultUI {
-    position: absolute;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: white;
-    text-align: center;
-    background: rgba(8,24,35,.58);
+.bar{
+    height:12px;
+    margin-top:7px;
+    background:#07151d;
+    border-radius:10px;
+    overflow:hidden;
 }
 
-#resultTitle {
-    font-size: clamp(50px,8vw,96px);
-    font-weight: 1000;
-    text-shadow: 0 7px 0 rgba(0,0,0,.28);
-    margin-bottom: 10px;
+.fill{
+    height:100%;
+    border-radius:10px;
 }
 
-#resultStats {
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.7;
-    margin-bottom: 25px;
+.hp{
+    background:#ef594f;
 }
 
-#touchControls {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+.shield{
+    background:#4fc6ec;
 }
 
-#joy {
-    position: absolute;
-    left: 30px;
-    bottom: 30px;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: rgba(20,45,55,.35);
-    border: 3px solid rgba(255,255,255,.28);
-    pointer-events: auto;
+#minimap{
+    position:absolute;
+    right:15px;
+    top:78px;
+    width:185px;
+    height:130px;
+    border:3px solid #ffffff55;
+    border-radius:8px;
+    overflow:hidden;
+    background:#3e9e61;
 }
 
-#joyKnob {
-    position: absolute;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    left: 44px;
-    top: 44px;
-    background: rgba(255,255,255,.5);
-    border: 3px solid rgba(255,255,255,.7);
+/* ---------------- DROP ---------------- */
+
+#dropUI{
+    display:none;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
 }
 
-#fire {
-    position: absolute;
-    right: 35px;
-    bottom: 40px;
-    width: 125px;
-    height: 125px;
-    border-radius: 50%;
-    background: rgba(232,73,54,.65);
-    border: 4px solid rgba(255,255,255,.5);
-    color: white;
-    font-size: 25px;
-    font-weight: 1000;
-    pointer-events: auto;
+.dropMessage{
+    position:absolute;
+    top:30px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    color:#fff;
+    text-shadow:0 3px #16495d;
 }
 
-@media (max-width: 800px) {
-    #menuButtons {
-        right: 15px;
-        bottom: 15px;
+.dropMessage strong{
+    display:block;
+    font-size:27px;
+}
+
+.dropMessage span{
+    font-size:15px;
+    color:#d8f7ff;
+}
+
+/* ---------------- TOUCH ---------------- */
+
+#touch{
+    display:none;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+#stick{
+    position:absolute;
+    left:25px;
+    bottom:25px;
+    width:145px;
+    height:145px;
+    border:3px solid #fff5;
+    border-radius:50%;
+    background:#102d3b55;
+    pointer-events:auto;
+}
+
+#knob{
+    position:absolute;
+    left:43px;
+    top:43px;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:#ffffff66;
+    border:2px solid #fff8;
+}
+
+#fire{
+    position:absolute;
+    right:28px;
+    bottom:30px;
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#e8554dcc;
+    border:4px solid #fff8;
+    color:white;
+    font-size:20px;
+    pointer-events:auto;
+}
+
+/* ---------------- RESULT ---------------- */
+
+#result{
+    display:none;
+    position:absolute;
+    inset:0;
+    background:#09202bcc;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:#fff;
+    text-align:center;
+}
+
+#result h1{
+    font-size:clamp(55px,9vw,100px);
+    margin:0;
+    text-shadow:0 7px #17485d;
+}
+
+#result p{
+    font-size:21px;
+    line-height:1.7;
+}
+
+.resultButton{
+    width:260px;
+    height:58px;
+    border-radius:10px;
+    background:#ffd34c;
+    color:white;
+    font-size:21px;
+    text-shadow:0 3px #9b6815;
+    box-shadow:0 5px #9b6815;
+}
+
+/* ---------------- INFO ---------------- */
+
+#info{
+    display:none;
+    position:absolute;
+    inset:0;
+    background:#09202cf2;
+    color:white;
+    padding:50px;
+    overflow:auto;
+    pointer-events:auto;
+}
+
+#info h1{
+    font-size:42px;
+    color:#ffd447;
+}
+
+#info p{
+    max-width:800px;
+    font-size:18px;
+    line-height:1.6;
+    color:#c5e1e9;
+}
+
+.back{
+    position:absolute;
+    top:20px;
+    left:20px;
+    background:#294b5c;
+    color:white;
+    border-radius:8px;
+    padding:12px 20px;
+}
+
+/* mobile */
+@media(max-width:700px){
+    .menuButtons{
+        right:15px;
+        bottom:15px;
+        width:210px;
     }
 
-    .menuButton {
-        min-width: 170px;
-        padding: 13px 18px;
-        font-size: 17px;
+    .logo{
+        top:25px;
     }
 
-    #joy,
-    #fire {
-        transform: scale(.8);
-        transform-origin: bottom left;
-    }
-
-    #fire {
-        transform-origin: bottom right;
+    #minimap{
+        width:140px;
+        height:100px;
     }
 }
 </style>
+
 </head>
 
 <body>
 
-<div id="gameWrap">
+<div id="game">
 
-    <canvas id="game"></canvas>
+<canvas id="canvas"></canvas>
 
-    <div class="ui">
+<!-- MAIN MENU -->
 
-        <div id="topMenu">
-            <div class="currency">
-                <div class="currencyBox">★ <span id="xpText">PRIVATE</span></div>
-                <div class="currencyBox">◆ <span id="bucksText">125</span></div>
-            </div>
+<div id="mainUI" class="menu">
+
+```
+<div class="logo">
+    BATTLELANDS
+    <span>ROYALE</span>
+</div>
+
+<div class="menuButtons">
+    <button class="play" id="play">PLAY</button>
+    <button class="menuSmall" id="about">SEASON 1 • GLOBAL LAUNCH</button>
+</div>
+```
+
+</div>
+
+<!-- GAME HUD -->
+
+<div id="hud">
+
+```
+<div class="top">
+
+    <div class="panel">
+        <div class="stat">
+            <small>ALIVE</small>
+            <strong id="alive">32</strong>
         </div>
 
-        <div id="menuButtons">
-            <button class="menuButton play" id="playBtn">PLAY</button>
-            <button class="menuButton blue" id="passBtn">SEASON 1</button>
-            <button class="menuButton green" id="shopBtn">BATTLE SHOP</button>
+        <div class="stat">
+            <small>KILLS</small>
+            <strong id="kills">0</strong>
         </div>
 
-        <button id="passBack" class="smallButton">← BACK</button>
-        <button id="shopBack" class="smallButton">← BACK</button>
-
-        <div id="resultUI">
-            <div id="resultTitle">VICTORY!</div>
-            <div id="resultStats"></div>
-            <button class="menuButton play" id="againBtn">PLAY AGAIN</button>
-            <button class="smallButton" id="resultBack">MAIN MENU</button>
+        <div class="stat">
+            <small>TIME</small>
+            <strong id="time">5:00</strong>
         </div>
-
-        <div id="touchControls">
-            <div id="joy">
-                <div id="joyKnob"></div>
-            </div>
-            <button id="fire">FIRE</button>
-        </div>
-
     </div>
+
+    <div class="panel">
+        <div class="stat">
+            <small>SEASON</small>
+            <strong>1</strong>
+        </div>
+    </div>
+
+</div>
+
+<canvas id="minimap"></canvas>
+
+<div id="weaponPanel" class="panel">
+
+    <div class="weaponName" id="weaponName">
+        NO WEAPON
+    </div>
+
+    <div class="ammo" id="ammo">
+        —
+    </div>
+
+    <div class="bar">
+        <div id="hp" class="fill hp" style="width:100%"></div>
+    </div>
+
+    <div class="bar">
+        <div id="shield" class="fill shield" style="width:0%"></div>
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- PARACHUTE -->
+
+<div id="dropUI">
+    <div class="dropMessage">
+        <strong>SELECT YOUR DROP AREA</strong>
+        <span>Move the marker and choose where you land</span>
+    </div>
+</div>
+
+<!-- TOUCH -->
+
+<div id="touch">
+
+```
+<div id="stick">
+    <div id="knob"></div>
+</div>
+
+<button id="fire">FIRE</button>
+```
+
+</div>
+
+<!-- INFO -->
+
+<div id="info">
+
+```
+<button class="back" id="back">← BACK</button>
+
+<h1>SEASON 1</h1>
+
+<p>
+    Global Launch — 2018
+</p>
+
+<p>
+    A small-scale battle royale recreation inspired by the
+    original early Battlelands Royale gameplay.
+</p>
+
+<p>
+    Drop onto the island, find a weapon, survive the shrinking
+    battle area and become the last battler standing.
+</p>
+
+<p>
+    Weapons in this recreation are limited to the early
+    Season 1 archetypes: Assault Rifle, Shotgun, Peacemaker,
+    Sniper, Minigun and Bazooka.
+</p>
+
+<p>
+    PC: WASD to move, mouse to aim and fire.
+    Mobile: use the left joystick and FIRE button.
+</p>
+```
+
+</div>
+
+<!-- RESULT -->
+
+<div id="result">
+
+```
+<h1 id="resultTitle">VICTORY!</h1>
+
+<p id="resultText"></p>
+
+<button class="resultButton" id="again">
+    PLAY AGAIN
+</button>
+```
+
+</div>
+
 </div>
 
 <script>
 "use strict";
 
-/* ============================================================
-   BATTLELANDS-STYLE SEASON 1 FAN RECREATION
-   One-file HTML / Canvas / JavaScript
-   ============================================================ */
+/* =========================================================
+   CANVAS
+========================================================= */
 
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const W = 1280;
-const H = 720;
+const mini = document.getElementById("minimap");
+const mctx = mini.getContext("2d");
 
-const MAP_W = 3000;
-const MAP_H = 2050;
+const VIEW_W = 1280;
+const VIEW_H = 720;
 
-let dpr = 1;
+const MAP_W = 3400;
+const MAP_H = 2300;
 
-function resizeCanvas() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+let DPR = 1;
+
+function resize(){
+
+    DPR = Math.min(devicePixelRatio || 1,2);
+
+    canvas.width = VIEW_W * DPR;
+    canvas.height = VIEW_H * DPR;
+
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+
+    mini.width = 370;
+    mini.height = 260;
 }
 
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
+resize();
 
-/* ------------------------------------------------------------
+addEventListener("resize",resize);
+
+/* =========================================================
    UI
------------------------------------------------------------- */
+========================================================= */
 
-const menuButtons = document.getElementById("menuButtons");
-const topMenu = document.getElementById("topMenu");
-const passBack = document.getElementById("passBack");
-const shopBack = document.getElementById("shopBack");
-const resultUI = document.getElementById("resultUI");
-const touchControls = document.getElementById("touchControls");
+const mainUI = document.getElementById("mainUI");
+const hud = document.getElementById("hud");
+const dropUI = document.getElementById("dropUI");
+const touch = document.getElementById("touch");
+const info = document.getElementById("info");
+const result = document.getElementById("result");
 
-const xpText = document.getElementById("xpText");
-const bucksText = document.getElementById("bucksText");
+const aliveText = document.getElementById("alive");
+const killsText = document.getElementById("kills");
+const timeText = document.getElementById("time");
+const weaponText = document.getElementById("weaponName");
+const ammoText = document.getElementById("ammo");
+const hpBar = document.getElementById("hp");
+const shieldBar = document.getElementById("shield");
 
-let screen = "menu";
-
-/* ------------------------------------------------------------
-   Player progression
------------------------------------------------------------- */
-
-let saved = JSON.parse(localStorage.getItem("BL_S1_SAVE") || "null") || {
-    xp: 0,
-    bucks: 125,
-    level: 1
-};
-
-function saveProgress() {
-    localStorage.setItem("BL_S1_SAVE", JSON.stringify(saved));
-}
-
-function updateProgressUI() {
-    xpText.textContent = rankName(saved.level);
-    bucksText.textContent = saved.bucks;
-}
-
-function rankName(level) {
-    const ranks = [
-        "PRIVATE",
-        "PRIVATE II",
-        "PRIVATE III",
-        "CORPORAL",
-        "CORPORAL II",
-        "SERGEANT",
-        "SERGEANT II",
-        "LIEUTENANT",
-        "CAPTAIN",
-        "MAJOR"
-    ];
-
-    return ranks[Math.min(Math.floor((level - 1) / 5), ranks.length - 1)];
-}
-
-updateProgressUI();
-
-/* ------------------------------------------------------------
-   Season 1 data
------------------------------------------------------------- */
-
-const seasonRewards = [
-    ["Neil Armslong", "Striped Parachute"],
-    ["25 Battle Bucks", "First Aid"],
-    ["—", "20 Battle Bucks"],
-    ["—", "LOL"],
-    ["Salute", "20 Battle Bucks"],
-    ["—", "Mushroom"],
-    ["—", "Salty!"],
-    ["25 Battle Bucks", "20 Battle Bucks"],
-    ["—", "Balloons"],
-    ["—", "Kaitsushi"],
-    ["Military Parachute", "80 Battle Bucks"],
-    ["—", "Umbrella"],
-    ["—", "Make It Rain!"],
-    ["25 Battle Bucks", "20 Battle Bucks"],
-    ["—", "Rainbow Parachute"],
-    ["—", "Pegleg"],
-    ["125 Battle Bucks", "Kite"],
-    ["—", "Supply Drop"],
-    ["—", "20 Battle Bucks"],
-    ["Burt Reynolds", "Rainbow"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Clap Clap"],
-    ["—", "Jason"],
-    ["—", "Watermelon"],
-    ["—", "100 Battle Bucks"],
-    ["—", "Winning Colors"],
-    ["—", "Robot Dance"],
-    ["—", "The Best Colors"],
-    ["—", "Kick It Up!"],
-    ["—", "Clint"],
-    ["—", "Banana"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Hot Dog"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Dogelina"],
-    ["—", "Pig Balloon"],
-    ["—", "100 Battle Bucks"],
-    ["—", "Chicken Dinner"],
-    ["—", "Move It, Doggy!"],
-    ["—", "Chuck"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Purdy Moves"],
-    ["—", "Bombs Up!"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Shuffle It"],
-    ["—", "20 Battle Bucks"],
-    ["—", "Spartacouscous"],
-    ["—", "Club Chute"],
-    ["—", "250 Battle Bucks"],
-    ["Bubba", "Astrid"]
-];
-
-/* ------------------------------------------------------------
-   Game data
------------------------------------------------------------- */
-
-const WEAPONS = {
-    fists: {
-        name: "FISTS",
-        damage: 15,
-        fireRate: .35,
-        speed: 620,
-        ammo: Infinity,
-        pellets: 1,
-        spread: .15,
-        color: "#e9d3a5",
-        range: 70
-    },
-
-    peacemaker: {
-        name: "PEACEMAKER",
-        damage: 24,
-        fireRate: .65,
-        speed: 900,
-        ammo: 24,
-        pellets: 1,
-        spread: .025,
-        color: "#9da9b3",
-        range: 650
-    },
-
-    assault: {
-        name: "ASSAULT RIFLE",
-        damage: 10,
-        fireRate: .13,
-        speed: 1000,
-        ammo: 55,
-        pellets: 1,
-        spread: .045,
-        color: "#70a86b",
-        range: 800
-    },
-
-    shotgun: {
-        name: "SHOTGUN",
-        damage: 9,
-        fireRate: .68,
-        speed: 780,
-        ammo: 14,
-        pellets: 6,
-        spread: .34,
-        color: "#d5a45e",
-        range: 420
-    },
-
-    sniper: {
-        name: "SNIPER",
-        damage: 62,
-        fireRate: 1.05,
-        speed: 1250,
-        ammo: 10,
-        pellets: 1,
-        spread: .008,
-        color: "#4b6a87",
-        range: 1250
-    },
-
-    minigun: {
-        name: "MINIGUN",
-        damage: 8,
-        fireRate: .055,
-        speed: 1050,
-        ammo: 80,
-        pellets: 1,
-        spread: .13,
-        color: "#d45c52",
-        range: 850
-    },
-
-    bazooka: {
-        name: "BAZOOKA",
-        damage: 75,
-        fireRate: 1.2,
-        speed: 520,
-        ammo: 4,
-        pellets: 1,
-        spread: .015,
-        color: "#cf654f",
-        range: 950,
-        explosive: true
-    }
-};
-
-const MAP_LOCATIONS = [
-    {x: 450, y: 390, name: "HIDEOUT"},
-    {x: 930, y: 1460, name: "PORT"},
-    {x: 1420, y: 410, name: "FARM"},
-    {x: 2160, y: 480, name: "SHIPYARD"},
-    {x: 2380, y: 1430, name: "CAMP"},
-    {x: 1450, y: 1150, name: "TOWN"},
-    {x: 590, y: 1040, name: "MEADOW"},
-    {x: 2180, y: 1000, name: "WAREHOUSE"}
-];
-
-const BUILDINGS = [
-    {x: 270, y: 260, w: 310, h: 230},
-    {x: 820, y: 1270, w: 360, h: 250},
-    {x: 1250, y: 240, w: 360, h: 230},
-    {x: 1970, y: 270, w: 390, h: 240},
-    {x: 2180, y: 1260, w: 350, h: 250},
-    {x: 1280, y: 980, w: 430, h: 300},
-    {x: 430, y: 830, w: 280, h: 190},
-    {x: 2050, y: 850, w: 330, h: 210}
-];
-
-const TREES = [];
-
-for (let i = 0; i < 170; i++) {
-    let x = 100 + Math.random() * (MAP_W - 200);
-    let y = 100 + Math.random() * (MAP_H - 200);
-
-    let tooClose = BUILDINGS.some(b =>
-        x > b.x - 80 &&
-        x < b.x + b.w + 80 &&
-        y > b.y - 80 &&
-        y < b.y + b.h + 80
-    );
-
-    if (!tooClose) {
-        TREES.push({
-            x,
-            y,
-            r: 14 + Math.random() * 12
-        });
-    }
-}
-
-/* ------------------------------------------------------------
-   Game state
------------------------------------------------------------- */
-
-let player;
-let bots = [];
-let bullets = [];
-let loot = [];
-let particles = [];
-let texts = [];
-let drops = [];
-
-let camera = {
-    x: 0,
-    y: 0
-};
-
-let zone = {};
-let gameTime = 0;
-let dropTime = 2.8;
-let landing = {
-    x: MAP_W / 2,
-    y: MAP_H / 2
-};
-
-let matchResult = null;
-
-/* ------------------------------------------------------------
-   Input
------------------------------------------------------------- */
+/* =========================================================
+   INPUT
+========================================================= */
 
 const keys = {};
 
-window.addEventListener("keydown", e => {
+addEventListener("keydown",e=>{
     keys[e.key.toLowerCase()] = true;
 
-    if (e.key === "Escape" && screen === "game") {
-        screen = "menu";
-        hideAllUI();
-    }
-
-    if (e.key.toLowerCase() === "r") {
+    if(e.key.toLowerCase()==="r"){
         reload();
     }
 });
 
-window.addEventListener("keyup", e => {
+addEventListener("keyup",e=>{
     keys[e.key.toLowerCase()] = false;
 });
 
 const mouse = {
-    x: W / 2,
-    y: H / 2,
-    down: false
+    x:VIEW_W/2,
+    y:VIEW_H/2,
+    down:false
 };
 
-canvas.addEventListener("pointermove", e => {
-    const r = canvas.getBoundingClientRect();
-    mouse.x = (e.clientX - r.left) * W / r.width;
-    mouse.y = (e.clientY - r.top) * H / r.height;
-});
-
-canvas.addEventListener("pointerdown", e => {
-    if (screen !== "game") return;
-
-    mouse.down = true;
+canvas.addEventListener("pointermove",e=>{
 
     const r = canvas.getBoundingClientRect();
-    mouse.x = (e.clientX - r.left) * W / r.width;
-    mouse.y = (e.clientY - r.top) * H / r.height;
+
+    mouse.x =
+        (e.clientX-r.left) *
+        VIEW_W/r.width;
+
+    mouse.y =
+        (e.clientY-r.top) *
+        VIEW_H/r.height;
 });
 
-window.addEventListener("pointerup", () => {
-    mouse.down = false;
+canvas.addEventListener("pointerdown",()=>{
+    mouse.down=true;
 });
 
-/* ------------------------------------------------------------
-   Touch joystick
------------------------------------------------------------- */
+addEventListener("pointerup",()=>{
+    mouse.down=false;
+});
 
-const joy = document.getElementById("joy");
-const joyKnob = document.getElementById("joyKnob");
+/* =========================================================
+   MOBILE JOYSTICK
+========================================================= */
+
+const stick = document.getElementById("stick");
+const knob = document.getElementById("knob");
 const fireButton = document.getElementById("fire");
 
 let joystick = {
-    active: false,
-    x: 0,
-    y: 0
+    active:false,
+    x:0,
+    y:0
 };
 
-function moveJoystick(clientX, clientY) {
-    const r = joy.getBoundingClientRect();
+function joystickMove(x,y){
 
-    let dx = clientX - (r.left + r.width / 2);
-    let dy = clientY - (r.top + r.height / 2);
+    const r = stick.getBoundingClientRect();
 
-    const max = r.width * .34;
-    const dist = Math.hypot(dx, dy);
+    let dx =
+        x-(r.left+r.width/2);
 
-    if (dist > max) {
-        dx = dx / dist * max;
-        dy = dy / dist * max;
+    let dy =
+        y-(r.top+r.height/2);
+
+    const max = r.width*.34;
+
+    const d = Math.hypot(dx,dy);
+
+    if(d>max){
+
+        dx = dx/d*max;
+        dy = dy/d*max;
     }
 
-    joystick.x = dx / max;
-    joystick.y = dy / max;
+    joystick.x=dx/max;
+    joystick.y=dy/max;
 
-    joyKnob.style.transform =
-        `translate(${dx}px, ${dy}px)`;
+    knob.style.transform =
+        `translate(${dx}px,${dy}px)`;
 }
 
-joy.addEventListener("pointerdown", e => {
-    joystick.active = true;
-    joy.setPointerCapture(e.pointerId);
-    moveJoystick(e.clientX, e.clientY);
+stick.addEventListener("pointerdown",e=>{
+    joystick.active=true;
+    stick.setPointerCapture(e.pointerId);
+    joystickMove(e.clientX,e.clientY);
 });
 
-joy.addEventListener("pointermove", e => {
-    if (joystick.active) {
-        moveJoystick(e.clientX, e.clientY);
+stick.addEventListener("pointermove",e=>{
+    if(joystick.active){
+        joystickMove(e.clientX,e.clientY);
     }
 });
 
-joy.addEventListener("pointerup", () => {
-    joystick.active = false;
-    joystick.x = 0;
-    joystick.y = 0;
-    joyKnob.style.transform = "translate(0,0)";
+stick.addEventListener("pointerup",()=>{
+    joystick.active=false;
+    joystick.x=0;
+    joystick.y=0;
+    knob.style.transform="translate(0,0)";
 });
 
-fireButton.addEventListener("pointerdown", () => {
-    mouse.down = true;
+fireButton.addEventListener("pointerdown",()=>{
+    mouse.down=true;
 });
 
-fireButton.addEventListener("pointerup", () => {
-    mouse.down = false;
+fireButton.addEventListener("pointerup",()=>{
+    mouse.down=false;
 });
 
-/* ------------------------------------------------------------
-   Helpers
------------------------------------------------------------- */
+/* =========================================================
+   WORLD
+========================================================= */
 
-function rand(min, max) {
-    return Math.random() * (max - min) + min;
-}
+const buildings = [
+    {x:300,y:280,w:370,h:270},
+    {x:830,y:210,w:300,h:220},
+    {x:1270,y:300,w:390,h:270},
+    {x:2040,y:260,w:420,h:280},
+    {x:2650,y:380,w:350,h:260},
 
-function choice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+    {x:420,y:950,w:300,h:220},
+    {x:900,y:850,w:430,h:300},
+    {x:1480,y:820,w:390,h:270},
+    {x:2080,y:850,w:360,h:300},
+    {x:2700,y:900,w:350,h:260},
 
-function dist(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
-}
+    {x:320,y:1580,w:410,h:270},
+    {x:930,y:1500,w:330,h:250},
+    {x:1470,y:1450,w:460,h:300},
+    {x:2150,y:1530,w:390,h:250},
+    {x:2740,y:1570,w:330,h:250}
+];
 
-function clamp(v, min, max) {
-    return Math.max(min, Math.min(max, v));
-}
+const trees=[];
 
-function lerp(a, b, t) {
-    return a + (b - a) * t;
-}
+for(let i=0;i<260;i++){
 
-function angleTo(a, b) {
-    return Math.atan2(b.y - a.y, b.x - a.x);
-}
+    const x=120+Math.random()*(MAP_W-240);
+    const y=120+Math.random()*(MAP_H-240);
 
-function worldMouse() {
-    return {
-        x: mouse.x + camera.x,
-        y: mouse.y + camera.y
-    };
-}
-
-/* ------------------------------------------------------------
-   Particles
------------------------------------------------------------- */
-
-function particle(x, y, color, amount = 8) {
-    for (let i = 0; i < amount; i++) {
-        particles.push({
+    if(
+        !buildings.some(b=>
+            x>b.x-70 &&
+            x<b.x+b.w+70 &&
+            y>b.y-70 &&
+            y<b.y+b.h+70
+        )
+    ){
+        trees.push({
             x,
             y,
-            vx: rand(-120,120),
-            vy: rand(-120,120),
-            life: rand(.25,.7),
-            max: .7,
-            color
+            r:14+Math.random()*13
         });
     }
 }
 
-function floatingText(x, y, text, color = "#fff") {
-    texts.push({
-        x,
-        y,
-        text,
-        color,
-        life: 1
-    });
-}
+const locations=[
+    ["SUBURBS",450,400],
+    ["FARM",1460,400],
+    ["SHIPYARD",2850,430],
+    ["MEADOW",560,1060],
+    ["TOWN",1660,1040],
+    ["WAREHOUSE",2250,1000],
+    ["PORT",1080,1640],
+    ["CAMP",2870,1700]
+];
 
-/* ------------------------------------------------------------
-   Start match
------------------------------------------------------------- */
+/* =========================================================
+   WEAPONS
+========================================================= */
 
-function startGame() {
+const weapons={
 
-    hideAllUI();
+    assault:{
+        name:"ASSAULT RIFLE",
+        damage:10,
+        fire:.14,
+        ammo:35,
+        speed:1050,
+        range:850,
+        spread:.035,
+        color:"#5b7655"
+    },
 
-    screen = "game";
+    shotgun:{
+        name:"SHOTGUN",
+        damage:10,
+        fire:.78,
+        ammo:8,
+        speed:800,
+        range:430,
+        spread:.25,
+        pellets:4,
+        color:"#c69252"
+    },
 
-    player = {
-        x: MAP_W / 2,
-        y: MAP_H / 2,
-        hp: 100,
-        shield: 0,
-        speed: 285,
-        weapon: "fists",
-        ammo: Infinity,
-        fireTimer: 0,
-        kills: 0,
-        alive: true,
-        invulnerable: false
+    peacemaker:{
+        name:"PEACEMAKER",
+        damage:24,
+        fire:.62,
+        ammo:18,
+        speed:930,
+        range:700,
+        spread:.025,
+        color:"#a5abb0"
+    },
+
+    sniper:{
+        name:"SNIPER",
+        damage:55,
+        fire:1.15,
+        ammo:5,
+        speed:1350,
+        range:1300,
+        spread:.006,
+        color:"#52718d"
+    },
+
+    minigun:{
+        name:"MINIGUN",
+        damage:7,
+        fire:.065,
+        ammo:65,
+        speed:1050,
+        range:900,
+        spread:.11,
+        color:"#b84c43"
+    },
+
+    bazooka:{
+        name:"BAZOOKA",
+        damage:75,
+        fire:1.35,
+        ammo:3,
+        speed:570,
+        range:1000,
+        spread:.01,
+        explosive:true,
+        color:"#d4674e"
+    }
+};
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+let state="menu";
+
+let player;
+let bots=[];
+let bullets=[];
+let loot=[];
+let particles=[];
+
+let camera={
+    x:0,
+    y:0
+};
+
+let matchTime=0;
+let dropTimer=0;
+
+let zone={
+    x:1700,
+    y:1150,
+    r:1250
+};
+
+let zonePhase=0;
+
+/* =========================================================
+   START
+========================================================= */
+
+function start(){
+
+    state="drop";
+
+    mainUI.style.display="none";
+    info.style.display="none";
+    result.style.display="none";
+
+    hud.style.display="block";
+    dropUI.style.display="block";
+    touch.style.display="block";
+
+    player={
+        x:1700,
+        y:1150,
+        hp:100,
+        shield:0,
+        speed:275,
+        weapon:null,
+        ammo:0,
+        fireTimer:0,
+        kills:0,
+        alive:true,
+        dropX:1700,
+        dropY:1150
     };
 
-    bots = [];
-    bullets = [];
-    loot = [];
-    particles = [];
-    texts = [];
-    drops = [];
+    bots=[];
+    bullets=[];
+    loot=[];
+    particles=[];
 
-    landing = {
-        x: rand(400, MAP_W - 400),
-        y: rand(350, MAP_H - 350)
-    };
+    /* 31 enemies = 32 total */
+    for(let i=0;i<31;i++){
 
-    player.x = landing.x;
-    player.y = landing.y;
+        let p=randomPosition();
 
-    for (let i = 0; i < 31; i++) {
-
-        let b = {
-            x: rand(150, MAP_W - 150),
-            y: rand(150, MAP_H - 150),
-            hp: 100,
-            shield: Math.random() < .28 ? 25 : 0,
-            speed: rand(120,185),
-            weapon: Math.random() < .55
-                ? choice(["peacemaker","assault","shotgun","sniper"])
-                : "fists",
-            ammo: 0,
-            fireTimer: rand(0,.8),
-            alive: true,
-            angle: rand(-Math.PI, Math.PI),
-            wanderTimer: rand(1,4),
-            color: choice([
-                "#e64d45",
-                "#4b8bd8",
-                "#e9a83b",
-                "#7b57c7",
-                "#35a878"
-            ]),
-            name: choice([
-                "BATTler",
-                "Player",
-                "Rex",
-                "Jax",
-                "Ninja",
-                "Mango",
-                "Ghost",
-                "Ace",
-                "Max",
-                "Lucky"
-            ]) + Math.floor(rand(10,99))
-        };
-
-        b.ammo = b.weapon === "fists"
-            ? Infinity
-            : Math.floor(WEAPONS[b.weapon].ammo * rand(.5,1));
-
-        bots.push(b);
+        bots.push({
+            x:p.x,
+            y:p.y,
+            hp:100,
+            shield:Math.random()<.25?25:0,
+            alive:true,
+            weapon:null,
+            ammo:0,
+            speed:145+Math.random()*45,
+            angle:Math.random()*Math.PI*2,
+            timer:Math.random()*3,
+            fireTimer:Math.random(),
+            color:[
+                "#d65a50",
+                "#4385c4",
+                "#e1a33f",
+                "#7454ba",
+                "#3aa272"
+            ][Math.floor(Math.random()*5)]
+        });
     }
 
     spawnLoot();
 
-    zone = {
-        x: MAP_W / 2,
-        y: MAP_H / 2,
-        r: 1080,
-        startR: 1080
+    zone={
+        x:1700,
+        y:1150,
+        r:1250
     };
 
-    gameTime = 0;
-    dropTime = 2.8;
-    matchResult = null;
+    matchTime=0;
+    dropTimer=5;
+    zonePhase=0;
 
-    touchControls.style.display = "block";
+    updateHUD();
 }
 
-/* ------------------------------------------------------------
-   Loot
------------------------------------------------------------- */
+/* =========================================================
+   RANDOM POSITIONS
+========================================================= */
 
-function spawnLoot() {
+function randomPosition(){
 
-    const weaponTypes = [
-        "peacemaker",
-        "assault",
-        "shotgun",
-        "sniper"
-    ];
+    while(true){
 
-    for (let i = 0; i < 85; i++) {
+        const x=120+Math.random()*(MAP_W-240);
+        const y=120+Math.random()*(MAP_H-240);
 
-        const p = randomSafeMapPosition();
-
-        let roll = Math.random();
-
-        if (roll < .48) {
-            loot.push({
-                x: p.x,
-                y: p.y,
-                type: "weapon",
-                weapon: choice(weaponTypes)
-            });
-        } else if (roll < .70) {
-            loot.push({
-                x: p.x,
-                y: p.y,
-                type: "ammo",
-                amount: Math.floor(rand(8,30))
-            });
-        } else if (roll < .86) {
-            loot.push({
-                x: p.x,
-                y: p.y,
-                type: "med",
-                amount: 30
-            });
-        } else {
-            loot.push({
-                x: p.x,
-                y: p.y,
-                type: "shield",
-                amount: 30
-            });
-        }
-    }
-
-    for (let i = 0; i < 3; i++) {
-        const p = randomSafeMapPosition();
-
-        drops.push({
-            x: p.x,
-            y: p.y,
-            opened: false,
-            weapon: Math.random() < .5 ? "minigun" : "bazooka"
-        });
-    }
-}
-
-function randomSafeMapPosition() {
-    for (;;) {
-        const x = rand(120, MAP_W - 120);
-        const y = rand(120, MAP_H - 120);
-
-        if (!BUILDINGS.some(b =>
-            x > b.x - 50 &&
-            x < b.x + b.w + 50 &&
-            y > b.y - 50 &&
-            y < b.y + b.h + 50
-        )) {
+        if(!buildings.some(b=>
+            x>b.x-45 &&
+            x<b.x+b.w+45 &&
+            y>b.y-45 &&
+            y<b.y+b.h+45
+        )){
             return {x,y};
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Collision
------------------------------------------------------------- */
+/* =========================================================
+   LOOT
+========================================================= */
 
-function collidesBuilding(x, y, radius = 16) {
+function spawnLoot(){
 
-    return BUILDINGS.some(b =>
-        x > b.x - radius &&
-        x < b.x + b.w + radius &&
-        y > b.y - radius &&
-        y < b.y + b.h + radius
-    );
-}
+    for(let i=0;i<90;i++){
 
-/* ------------------------------------------------------------
-   Shooting
------------------------------------------------------------- */
+        const p=randomPosition();
 
-function shoot(shooter, target, isPlayer = false) {
+        const r=Math.random();
 
-    const weapon = WEAPONS[shooter.weapon];
+        if(r<.58){
 
-    if (!weapon) return;
+            loot.push({
+                x:p.x,
+                y:p.y,
+                type:"weapon",
+                weapon:[
+                    "assault",
+                    "shotgun",
+                    "peacemaker",
+                    "sniper"
+                ][Math.floor(Math.random()*4)],
+                pickup:0
+            });
 
-    if (shooter.fireTimer > 0) return;
+        }else if(r<.77){
 
-    if (weapon.ammo !== Infinity && shooter.ammo <= 0) {
-        return;
+            loot.push({
+                x:p.x,
+                y:p.y,
+                type:"ammo"
+            });
+
+        }else if(r<.9){
+
+            loot.push({
+                x:p.x,
+                y:p.y,
+                type:"med"
+            });
+
+        }else{
+
+            loot.push({
+                x:p.x,
+                y:p.y,
+                type:"shield"
+            });
+        }
     }
 
-    shooter.fireTimer = weapon.fireRate;
+    /* supply drops */
 
-    if (weapon.ammo !== Infinity) {
-        shooter.ammo--;
-    }
+    for(let i=0;i<3;i++){
 
-    for (let i = 0; i < weapon.pellets; i++) {
+        const p=randomPosition();
 
-        let a = angleTo(shooter, target);
-
-        a += rand(-weapon.spread, weapon.spread);
-
-        bullets.push({
-            x: shooter.x,
-            y: shooter.y,
-            vx: Math.cos(a) * weapon.speed,
-            vy: Math.sin(a) * weapon.speed,
-            damage: weapon.damage,
-            life: weapon.range / weapon.speed,
-            explosive: !!weapon.explosive,
-            owner: isPlayer ? "player" : shooter,
-            color: weapon.color,
-            radius: weapon.explosive ? 7 : 3
+        loot.push({
+            x:p.x,
+            y:p.y,
+            type:"supply",
+            weapon:Math.random()<.5
+                ?"minigun"
+                :"bazooka",
+            pickup:0
         });
     }
+}
 
-    particle(
-        shooter.x + Math.cos(angleTo(shooter,target))*20,
-        shooter.y + Math.sin(angleTo(shooter,target))*20,
-        weapon.color,
-        weapon.explosive ? 8 : 3
+/* =========================================================
+   COLLISION
+========================================================= */
+
+function blocked(x,y,r=17){
+
+    return buildings.some(b=>
+        x>b.x-r &&
+        x<b.x+b.w+r &&
+        y>b.y-r &&
+        y<b.y+b.h+r
     );
 }
 
-function reload() {
+/* =========================================================
+   PLAYER
+========================================================= */
 
-    if (!player || !player.alive) return;
+function updatePlayer(dt){
 
-    if (player.weapon === "fists") return;
+    if(!player.alive)return;
 
-    player.ammo += Math.floor(WEAPONS[player.weapon].ammo * .5);
+    let dx=0;
+    let dy=0;
 
-    floatingText(
-        player.x,
-        player.y - 30,
-        "RELOADED",
-        "#ffe27b"
-    );
-}
+    if(keys.w||keys.arrowup)dy--;
+    if(keys.s||keys.arrowdown)dy++;
+    if(keys.a||keys.arrowleft)dx--;
+    if(keys.d||keys.arrowright)dx++;
 
-/* ------------------------------------------------------------
-   Damage
------------------------------------------------------------- */
+    if(joystick.active){
 
-function damageEntity(entity, amount, owner) {
-
-    if (!entity.alive) return;
-
-    if (entity.shield > 0) {
-
-        const absorbed = Math.min(entity.shield, amount);
-
-        entity.shield -= absorbed;
-        amount -= absorbed;
+        dx=joystick.x;
+        dy=joystick.y;
     }
 
-    entity.hp -= amount;
+    const length=Math.hypot(dx,dy);
 
-    particle(
-        entity.x,
-        entity.y,
-        "#ffdb55",
-        4
-    );
+    if(length){
 
-    if (entity.hp <= 0) {
+        dx/=length;
+        dy/=length;
 
-        entity.hp = 0;
-        entity.alive = false;
-
-        if (entity === player) {
-            finishGame(false);
-            return;
-        }
-
-        if (owner === "player") {
-            player.kills++;
-
-            saved.xp += 35;
-
-            floatingText(
-                entity.x,
-                entity.y - 35,
-                "+35 XP",
-                "#ffe46c"
-            );
-
-            particle(
-                entity.x,
-                entity.y,
-                "#ffbd4a",
-                18
-            );
-
-            if (Math.random() < .75) {
-                loot.push({
-                    x: entity.x,
-                    y: entity.y,
-                    type: "ammo",
-                    amount: Math.floor(rand(10,25))
-                });
-            }
-        }
-    }
-}
-
-/* ------------------------------------------------------------
-   Explosions
------------------------------------------------------------- */
-
-function explode(x, y, owner) {
-
-    particle(x,y,"#ffcf52",35);
-    particle(x,y,"#ed624e",25);
-
-    const radius = 115;
-
-    for (const b of bots) {
-
-        if (!b.alive) continue;
-
-        const d = Math.hypot(b.x-x,b.y-y);
-
-        if (d < radius) {
-            damageEntity(
-                b,
-                75 * (1 - d/radius),
-                owner
-            );
-        }
-    }
-
-    if (player.alive) {
-
-        const d = Math.hypot(player.x-x,player.y-y);
-
-        if (d < radius && owner !== "player") {
-            damageEntity(
-                player,
-                75 * (1-d/radius),
-                owner
-            );
-        }
-    }
-}
-
-/* ------------------------------------------------------------
-   Update
------------------------------------------------------------- */
-
-function update(dt) {
-
-    updateParticles(dt);
-    updateTexts(dt);
-
-    if (screen !== "game") return;
-
-    if (dropTime > 0) {
-
-        dropTime -= dt;
-
-        player.invulnerable = true;
-
-        if (dropTime <= 0) {
-            player.invulnerable = false;
-        }
-
-        updateCamera();
-        return;
-    }
-
-    gameTime += dt;
-
-    updateZone(dt);
-    updatePlayer(dt);
-    updateBots(dt);
-    updateBullets(dt);
-    updateLoot();
-    updateDrops();
-
-    if (player.alive && aliveCount() <= 1) {
-        finishGame(true);
-    }
-
-    if (gameTime > 185 && player.alive) {
-        finishGame(true);
-    }
-
-    updateCamera();
-}
-
-/* ------------------------------------------------------------
-   Player update
------------------------------------------------------------- */
-
-function updatePlayer(dt) {
-
-    if (!player.alive) return;
-
-    let dx = 0;
-    let dy = 0;
-
-    if (keys["w"] || keys["arrowup"]) dy--;
-    if (keys["s"] || keys["arrowdown"]) dy++;
-    if (keys["a"] || keys["arrowleft"]) dx--;
-    if (keys["d"] || keys["arrowright"]) dx++;
-
-    if (joystick.active) {
-        dx = joystick.x;
-        dy = joystick.y;
-    }
-
-    const mag = Math.hypot(dx,dy);
-
-    if (mag > 0) {
-        dx /= mag;
-        dy /= mag;
-    }
-
-    let nx = player.x + dx * player.speed * dt;
-    let ny = player.y + dy * player.speed * dt;
-
-    if (!collidesBuilding(nx, player.y)) {
-        player.x = nx;
-    }
-
-    if (!collidesBuilding(player.x, ny)) {
-        player.y = ny;
-    }
-
-    player.x = clamp(player.x,30,MAP_W-30);
-    player.y = clamp(player.y,30,MAP_H-30);
-
-    player.fireTimer -= dt;
-
-    if (mouse.down) {
-
-        const target = worldMouse();
-
-        shoot(
+        moveEntity(
             player,
-            target,
-            true
+            dx*player.speed*dt,
+            dy*player.speed*dt
         );
     }
 
-    if (outsideZone(player)) {
+    player.fireTimer-=dt;
 
-        if (!player.invulnerable) {
-            player.hp -= 8 * dt;
+    if(mouse.down){
 
-            if (Math.random() < dt * 2) {
-                floatingText(
-                    player.x,
-                    player.y - 35,
-                    "STORM!",
-                    "#75d7ff"
-                );
-            }
+        const target={
+            x:camera.x+mouse.x,
+            y:camera.y+mouse.y
+        };
 
-            if (player.hp <= 0) {
-                finishGame(false);
-            }
+        shoot(player,target,true);
+    }
+
+    pickupLoot(dt);
+
+    if(outsideZone(player)){
+
+        player.hp-=7*dt;
+
+        if(player.hp<=0){
+            player.alive=false;
+            endGame(false);
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Bot update
------------------------------------------------------------- */
+/* =========================================================
+   MOVEMENT
+========================================================= */
 
-function updateBots(dt) {
+function moveEntity(e,dx,dy){
 
-    for (const b of bots) {
+    const nx=e.x+dx;
 
-        if (!b.alive) continue;
+    if(!blocked(nx,e.y)){
+        e.x=nx;
+    }
 
-        b.fireTimer -= dt;
-        b.wanderTimer -= dt;
+    const ny=e.y+dy;
 
-        let target = null;
+    if(!blocked(e.x,ny)){
+        e.y=ny;
+    }
 
-        const dToPlayer = dist(b,player);
+    e.x=Math.max(30,Math.min(MAP_W-30,e.x));
+    e.y=Math.max(30,Math.min(MAP_H-30,e.y));
+}
 
-        if (dToPlayer < 650 && player.alive) {
-            target = player;
-        }
+/* =========================================================
+   BOTS
+========================================================= */
 
-        if (!target) {
+function updateBots(dt){
 
-            if (b.wanderTimer <= 0) {
-                b.wanderTimer = rand(1.5,4);
-                b.angle += rand(-1.5,1.5);
+    for(const b of bots){
+
+        if(!b.alive)continue;
+
+        b.fireTimer-=dt;
+        b.timer-=dt;
+
+        const distance=
+            Math.hypot(
+                player.x-b.x,
+                player.y-b.y
+            );
+
+        /* acquire player */
+
+        if(player.alive && distance<620){
+
+            const a=Math.atan2(
+                player.y-b.y,
+                player.x-b.x
+            );
+
+            if(distance>260){
+
+                moveEntity(
+                    b,
+                    Math.cos(a)*b.speed*dt,
+                    Math.sin(a)*b.speed*dt
+                );
+
+            }else{
+
+                moveEntity(
+                    b,
+                    -Math.cos(a)*b.speed*.6*dt,
+                    -Math.sin(a)*b.speed*.6*dt
+                );
             }
 
-            let nx = b.x + Math.cos(b.angle) * b.speed * dt;
-            let ny = b.y + Math.sin(b.angle) * b.speed * dt;
-
-            if (!collidesBuilding(nx,b.x === nx ? b.y : b.y)) {
-                b.x = nx;
-            }
-
-            if (!collidesBuilding(b.x,ny)) {
-                b.y = ny;
-            }
-
-        } else {
-
-            const a = angleTo(b,target);
-
-            let desiredDistance = 300;
-
-            if (b.weapon === "shotgun") {
-                desiredDistance = 160;
-            }
-
-            if (b.weapon === "sniper") {
-                desiredDistance = 520;
-            }
-
-            if (dToPlayer > desiredDistance) {
-
-                let nx = b.x + Math.cos(a)*b.speed*dt;
-                let ny = b.y + Math.sin(a)*b.speed*dt;
-
-                if (!collidesBuilding(nx,b.y)) b.x = nx;
-                if (!collidesBuilding(b.x,ny)) b.y = ny;
-
-            } else if (dToPlayer < desiredDistance*.65) {
-
-                let nx = b.x - Math.cos(a)*b.speed*dt;
-                let ny = b.y - Math.sin(a)*b.speed*dt;
-
-                if (!collidesBuilding(nx,b.y)) b.x = nx;
-                if (!collidesBuilding(b.x,ny)) b.y = ny;
-            }
-
-            if (b.weapon !== "fists" && dToPlayer < WEAPONS[b.weapon].range) {
+            if(b.weapon && distance<weapons[b.weapon].range){
                 shoot(b,player,false);
             }
+
+        }else{
+
+            if(b.timer<=0){
+
+                b.timer=1.5+Math.random()*3;
+                b.angle+=(-1+Math.random()*2);
+            }
+
+            moveEntity(
+                b,
+                Math.cos(b.angle)*b.speed*.45*dt,
+                Math.sin(b.angle)*b.speed*.45*dt
+            );
+
+            botPickup(b);
         }
 
-        b.x = clamp(b.x,30,MAP_W-30);
-        b.y = clamp(b.y,30,MAP_H-30);
+        if(outsideZone(b)){
 
-        if (outsideZone(b)) {
+            b.hp-=6*dt;
 
-            b.hp -= 7 * dt;
-
-            if (b.hp <= 0) {
-                b.alive = false;
+            if(b.hp<=0){
+                b.alive=false;
             }
         }
+    }
 
-        // Bots can occasionally "loot" nearby weapons.
-        if (b.weapon === "fists") {
+    /* background battles */
+    if(Math.random()<dt*.055){
 
-            for (let i=loot.length-1; i>=0; i--) {
+        const alive=bots.filter(b=>b.alive);
 
-                const l = loot[i];
+        if(alive.length>2){
 
-                if (l.type === "weapon" &&
-                    Math.hypot(l.x-b.x,l.y-b.y) < 45) {
+            const a=alive[
+                Math.floor(Math.random()*alive.length)
+            ];
 
-                    b.weapon = l.weapon;
-                    b.ammo = Math.floor(WEAPONS[l.weapon].ammo * .7);
+            const others=alive.filter(x=>x!==a);
 
-                    loot.splice(i,1);
-                    break;
+            if(others.length){
+
+                const target=
+                    others[Math.floor(Math.random()*others.length)];
+
+                if(Math.random()<.65){
+
+                    target.hp-=
+                        8+Math.random()*22;
+
+                    if(target.hp<=0){
+                        target.alive=false;
+                    }
                 }
             }
         }
     }
+}
 
-    // Simulate combat between distant players.
-    if (Math.random() < dt * .045 && bots.filter(b=>b.alive).length > 2) {
+/* =========================================================
+   BOT LOOT
+========================================================= */
 
-        const candidates = bots.filter(b =>
-            b.alive &&
-            dist(b,player) > 500
-        );
+function botPickup(b){
 
-        if (candidates.length) {
-            choice(candidates).alive = false;
+    for(let i=loot.length-1;i>=0;i--){
+
+        const l=loot[i];
+
+        if(
+            (l.type==="weapon"||l.type==="supply") &&
+            Math.hypot(l.x-b.x,l.y-b.y)<28
+        ){
+
+            b.weapon=l.weapon;
+            b.ammo=
+                weapons[b.weapon].ammo;
+
+            loot.splice(i,1);
+
+            return;
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Bullets
------------------------------------------------------------- */
+/* =========================================================
+   PICKUP
+========================================================= */
 
-function updateBullets(dt) {
+function pickupLoot(dt){
 
-    for (let i=bullets.length-1; i>=0; i--) {
+    for(let i=loot.length-1;i>=0;i--){
 
-        const b = bullets[i];
+        const l=loot[i];
 
-        b.x += b.vx * dt;
-        b.y += b.vy * dt;
-        b.life -= dt;
+        if(Math.hypot(
+            l.x-player.x,
+            l.y-player.y
+        )>35)continue;
 
-        let remove = b.life <= 0;
+        if(l.type==="weapon"||l.type==="supply"){
 
-        if (
-            b.x < 0 ||
-            b.y < 0 ||
-            b.x > MAP_W ||
-            b.y > MAP_H
-        ) {
-            remove = true;
-        }
+            l.pickup+=dt;
 
-        if (!remove && collidesBuilding(b.x,b.y,b.radius)) {
-            remove = true;
+            if(l.pickup>.25){
 
-            if (b.explosive) {
-                explode(b.x,b.y,b.owner);
+                player.weapon=l.weapon;
+                player.ammo=
+                    weapons[l.weapon].ammo;
+
+                loot.splice(i,1);
+
+                burst(
+                    player.x,
+                    player.y,
+                    "#ffe05a",
+                    12
+                );
+
+                continue;
+            }
+
+        }else{
+
+            if(l.type==="ammo"){
+
+                if(player.weapon){
+                    player.ammo+=10;
+                    loot.splice(i,1);
+                }
+
+            }else if(l.type==="med"){
+
+                if(player.hp<100){
+
+                    player.hp=
+                        Math.min(100,player.hp+25);
+
+                    loot.splice(i,1);
+                }
+
+            }else if(l.type==="shield"){
+
+                if(player.shield<100){
+
+                    player.shield=
+                        Math.min(100,player.shield+25);
+
+                    loot.splice(i,1);
+                }
             }
         }
+    }
+}
 
-        if (!remove) {
+/* =========================================================
+   SHOOTING
+========================================================= */
 
-            if (b.owner === "player") {
+function shoot(shooter,target,isPlayer){
 
-                for (const bot of bots) {
+    if(!shooter.weapon)return;
 
-                    if (!bot.alive) continue;
+    const w=weapons[shooter.weapon];
 
-                    if (Math.hypot(bot.x-b.x,bot.y-b.y) < 20) {
+    if(shooter.fireTimer>0)return;
 
-                        if (b.explosive) {
-                            explode(b.x,b.y,"player");
-                        } else {
-                            damageEntity(
-                                bot,
-                                b.damage,
-                                "player"
+    if(shooter.ammo<=0)return;
+
+    shooter.fireTimer=w.fire;
+    shooter.ammo--;
+
+    const count=w.pellets||1;
+
+    for(let i=0;i<count;i++){
+
+        const base=
+            Math.atan2(
+                target.y-shooter.y,
+                target.x-shooter.x
+            );
+
+        const angle=
+            base+
+            (-w.spread+
+            Math.random()*w.spread*2);
+
+        bullets.push({
+
+            x:shooter.x,
+            y:shooter.y,
+
+            vx:Math.cos(angle)*w.speed,
+            vy:Math.sin(angle)*w.speed,
+
+            damage:w.damage,
+            life:w.range/w.speed,
+
+            explosive:!!w.explosive,
+
+            owner:isPlayer
+                ?"player"
+                :shooter,
+
+            color:w.color
+        });
+    }
+}
+
+function reload(){
+
+    if(!player.weapon)return;
+
+    player.ammo=
+        weapons[player.weapon].ammo;
+}
+
+/* =========================================================
+   BULLETS
+========================================================= */
+
+function updateBullets(dt){
+
+    for(let i=bullets.length-1;i>=0;i--){
+
+        const b=bullets[i];
+
+        b.x+=b.vx*dt;
+        b.y+=b.vy*dt;
+        b.life-=dt;
+
+        let remove=
+            b.life<=0||
+            blocked(b.x,b.y,3);
+
+        if(!remove){
+
+            if(b.owner==="player"){
+
+                for(const enemy of bots){
+
+                    if(!enemy.alive)continue;
+
+                    if(Math.hypot(
+                        enemy.x-b.x,
+                        enemy.y-b.y
+                    )<19){
+
+                        hit(
+                            enemy,
+                            b.damage,
+                            true
+                        );
+
+                        remove=true;
+
+                        if(b.explosive){
+                            explosion(
+                                b.x,
+                                b.y,
+                                true
                             );
                         }
 
-                        remove = true;
                         break;
                     }
                 }
 
-            } else {
+            }else{
 
-                if (player.alive &&
-                    Math.hypot(player.x-b.x,player.y-b.y) < 20) {
+                if(
+                    player.alive &&
+                    Math.hypot(
+                        player.x-b.x,
+                        player.y-b.y
+                    )<19
+                ){
 
-                    if (b.explosive) {
-                        explode(b.x,b.y,b.owner);
-                    } else {
-                        damageEntity(
-                            player,
-                            b.damage,
-                            b.owner
+                    hit(
+                        player,
+                        b.damage,
+                        false
+                    );
+
+                    remove=true;
+
+                    if(b.explosive){
+                        explosion(
+                            b.x,
+                            b.y,
+                            false
                         );
                     }
-
-                    remove = true;
                 }
             }
         }
 
-        if (remove) {
+        if(remove){
+
+            if(b.explosive){
+                explosion(
+                    b.x,
+                    b.y,
+                    b.owner==="player"
+                );
+            }
+
             bullets.splice(i,1);
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Loot pickup
------------------------------------------------------------- */
+/* =========================================================
+   DAMAGE
+========================================================= */
 
-function updateLoot() {
+function hit(entity,damage,fromPlayer){
 
-    if (!player.alive) return;
+    if(entity.shield>0){
 
-    for (let i=loot.length-1; i>=0; i--) {
+        const absorbed=
+            Math.min(entity.shield,damage);
 
-        const l = loot[i];
+        entity.shield-=absorbed;
+        damage-=absorbed;
+    }
 
-        if (Math.hypot(l.x-player.x,l.y-player.y) > 38) {
-            continue;
-        }
+    entity.hp-=damage;
 
-        if (l.type === "weapon") {
+    burst(
+        entity.x,
+        entity.y,
+        "#ffdf62",
+        5
+    );
 
-            player.weapon = l.weapon;
-            player.ammo = WEAPONS[l.weapon].ammo;
+    if(entity.hp<=0){
 
-            floatingText(
-                player.x,
-                player.y - 32,
-                WEAPONS[l.weapon].name,
-                "#ffe36a"
+        entity.hp=0;
+        entity.alive=false;
+
+        if(entity!==player && fromPlayer){
+
+            player.kills++;
+
+            burst(
+                entity.x,
+                entity.y,
+                "#f05b4f",
+                20
             );
-
-            loot.splice(i,1);
         }
 
-        else if (l.type === "ammo") {
-
-            if (player.weapon !== "fists") {
-
-                player.ammo += l.amount;
-
-                floatingText(
-                    player.x,
-                    player.y - 32,
-                    "+" + l.amount + " AMMO",
-                    "#d5f0ff"
-                );
-
-                loot.splice(i,1);
-            }
-        }
-
-        else if (l.type === "med") {
-
-            if (player.hp < 100) {
-
-                player.hp = Math.min(
-                    100,
-                    player.hp + l.amount
-                );
-
-                floatingText(
-                    player.x,
-                    player.y - 32,
-                    "+HEALTH",
-                    "#70e887"
-                );
-
-                loot.splice(i,1);
-            }
-        }
-
-        else if (l.type === "shield") {
-
-            if (player.shield < 100) {
-
-                player.shield = Math.min(
-                    100,
-                    player.shield + l.amount
-                );
-
-                floatingText(
-                    player.x,
-                    player.y - 32,
-                    "+SHIELD",
-                    "#6fd7ff"
-                );
-
-                loot.splice(i,1);
-            }
+        if(entity===player){
+            endGame(false);
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Supply drops
------------------------------------------------------------- */
+/* =========================================================
+   EXPLOSION
+========================================================= */
 
-function updateDrops() {
+function explosion(x,y,fromPlayer){
 
-    for (const d of drops) {
+    const radius=110;
 
-        if (d.opened) continue;
+    burst(x,y,"#ffca3e",30);
+    burst(x,y,"#e75545",20);
 
-        if (Math.hypot(
-            d.x-player.x,
-            d.y-player.y
-        ) < 55) {
+    for(const b of bots){
 
-            d.opened = true;
+        if(!b.alive)continue;
 
-            player.weapon = d.weapon;
-            player.ammo = WEAPONS[d.weapon].ammo;
-
-            floatingText(
-                player.x,
-                player.y - 40,
-                d.weapon === "bazooka"
-                    ? "BAZOOKA!"
-                    : "MINIGUN!",
-                "#ffdc4a"
+        const d=
+            Math.hypot(
+                b.x-x,
+                b.y-y
             );
 
-            particle(
-                d.x,
-                d.y,
-                "#ffca45",
-                35
+        if(d<radius){
+            hit(
+                b,
+                75*(1-d/radius),
+                fromPlayer
+            );
+        }
+    }
+
+    if(player.alive && !fromPlayer){
+
+        const d=
+            Math.hypot(
+                player.x-x,
+                player.y-y
+            );
+
+        if(d<radius){
+            hit(
+                player,
+                75*(1-d/radius),
+                false
             );
         }
     }
 }
 
-/* ------------------------------------------------------------
-   Zone
------------------------------------------------------------- */
+/* =========================================================
+   ZONE
+========================================================= */
 
-function updateZone() {
+function updateZone(){
 
-    let phase;
+    if(matchTime<35){
 
-    if (gameTime < 30) {
-        phase = 0;
-    } else if (gameTime < 70) {
-        phase = (gameTime - 30) / 40;
-        zone.r = lerp(1080,780,phase);
-    } else if (gameTime < 110) {
-        phase = (gameTime - 70) / 40;
-        zone.r = lerp(780,500,phase);
-    } else if (gameTime < 145) {
-        phase = (gameTime - 110) / 35;
-        zone.r = lerp(500,250,phase);
-    } else {
-        phase = clamp((gameTime - 145) / 40,0,1);
-        zone.r = lerp(250,80,phase);
+        zone.r=1250;
+
+    }else if(matchTime<75){
+
+        zone.r=
+            1250-
+            ((matchTime-35)/40)*400;
+
+    }else if(matchTime<115){
+
+        zone.r=
+            850-
+            ((matchTime-75)/40)*350;
+
+    }else if(matchTime<155){
+
+        zone.r=
+            500-
+            ((matchTime-115)/40)*300;
+
+    }else{
+
+        zone.r=200;
     }
 }
 
-function outsideZone(entity) {
+function outsideZone(e){
 
     return Math.hypot(
-        entity.x-zone.x,
-        entity.y-zone.y
-    ) > zone.r;
+        e.x-zone.x,
+        e.y-zone.y
+    )>zone.r;
 }
 
-/* ------------------------------------------------------------
-   Camera
------------------------------------------------------------- */
+/* =========================================================
+   PARTICLES
+========================================================= */
 
-function updateCamera() {
+function burst(x,y,color,count){
 
-    camera.x = clamp(
-        player.x - W/2,
-        0,
-        MAP_W-W
-    );
+    for(let i=0;i<count;i++){
 
-    camera.y = clamp(
-        player.y - H/2,
-        0,
-        MAP_H-H
-    );
-}
-
-/* ------------------------------------------------------------
-   Alive count
------------------------------------------------------------- */
-
-function aliveCount() {
-
-    return 1 + bots.filter(b => b.alive).length;
-}
-
-/* ------------------------------------------------------------
-   End game
------------------------------------------------------------- */
-
-function finishGame(win) {
-
-    if (matchResult) return;
-
-    matchResult = win ? "win" : "lose";
-
-    player.alive = win ? true : false;
-
-    const xpGain = win
-        ? 250 + player.kills * 35
-        : 75 + player.kills * 20;
-
-    saved.xp += xpGain;
-
-    if (win) {
-        saved.bucks += 25;
-    }
-
-    saved.level = Math.min(
-        50,
-        1 + Math.floor(saved.xp / 300)
-    );
-
-    saveProgress();
-    updateProgressUI();
-
-    resultUI.style.display = "flex";
-
-    document.getElementById("resultTitle").textContent =
-        win ? "VICTORY!" : "ELIMINATED";
-
-    document.getElementById("resultStats").innerHTML =
-        `PLACEMENT: ${win ? "1ST" : aliveCount() + 1}<br>` +
-        `ELIMINATIONS: ${player.kills}<br>` +
-        `XP EARNED: +${xpGain}` +
-        (win ? `<br>★ +25 BATTLE BUCKS` : "");
-
-    touchControls.style.display = "none";
-}
-
-/* ------------------------------------------------------------
-   UI
------------------------------------------------------------- */
-
-function hideAllUI() {
-
-    menuButtons.style.display = "none";
-    topMenu.style.display = "none";
-    passBack.style.display = "none";
-    shopBack.style.display = "none";
-    resultUI.style.display = "none";
-    touchControls.style.display = "none";
-}
-
-function showMenu() {
-
-    screen = "menu";
-
-    hideAllUI();
-
-    menuButtons.style.display = "flex";
-    topMenu.style.display = "flex";
-
-    updateProgressUI();
-}
-
-document.getElementById("playBtn").onclick = startGame;
-
-document.getElementById("passBtn").onclick = () => {
-
-    screen = "pass";
-
-    hideAllUI();
-
-    passBack.style.display = "block";
-    topMenu.style.display = "flex";
-};
-
-document.getElementById("shopBtn").onclick = () => {
-
-    screen = "shop";
-
-    hideAllUI();
-
-    shopBack.style.display = "block";
-    topMenu.style.display = "flex";
-};
-
-passBack.onclick = showMenu;
-shopBack.onclick = showMenu;
-
-document.getElementById("againBtn").onclick = startGame;
-document.getElementById("resultBack").onclick = showMenu;
-
-/* ------------------------------------------------------------
-   Drawing helpers
------------------------------------------------------------- */
-
-function roundRect(x,y,w,h,r,fill,stroke) {
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        x,y,w,h,r
-    );
-
-    if (fill) {
-        ctx.fillStyle = fill;
-        ctx.fill();
-    }
-
-    if (stroke) {
-        ctx.strokeStyle = stroke;
-        ctx.stroke();
+        particles.push({
+            x,
+            y,
+            vx:(Math.random()-.5)*250,
+            vy:(Math.random()-.5)*250,
+            life:.35+Math.random()*.5,
+            color
+        });
     }
 }
 
-function text(
-    str,
-    x,
-    y,
-    size,
-    color = "#fff",
-    align = "left",
-    weight = 800
-) {
-    ctx.font =
-        `${weight} ${size}px Arial, Helvetica, sans-serif`;
+function updateParticles(dt){
 
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.textBaseline = "middle";
+    for(let i=particles.length-1;i>=0;i--){
 
-    ctx.fillText(str,x,y);
-}
+        const p=particles[i];
 
-function shadowText(
-    str,
-    x,
-    y,
-    size,
-    color = "#fff",
-    align = "left"
-) {
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
 
-    ctx.save();
+        p.vx*=.93;
+        p.vy*=.93;
 
-    ctx.textAlign = align;
-    ctx.textBaseline = "middle";
-    ctx.font = `900 ${size}px Arial`;
+        p.life-=dt;
 
-    ctx.fillStyle = "rgba(0,0,0,.35)";
-    ctx.fillText(str,x+3,y+5);
-
-    ctx.fillStyle = color;
-    ctx.fillText(str,x,y);
-
-    ctx.restore();
-}
-
-/* ------------------------------------------------------------
-   Main menu
------------------------------------------------------------- */
-
-function drawMenu() {
-
-    // sky
-    const sky = ctx.createLinearGradient(0,0,0,H);
-    sky.addColorStop(0,"#65c8e7");
-    sky.addColorStop(.55,"#a3e2ed");
-    sky.addColorStop(1,"#75c67a");
-
-    ctx.fillStyle = sky;
-    ctx.fillRect(0,0,W,H);
-
-    // clouds
-    for (let i=0;i<7;i++) {
-
-        const x = 90 + i*210;
-        const y = 80 + (i%3)*45;
-
-        ctx.fillStyle = "rgba(255,255,255,.75)";
-
-        ctx.beginPath();
-        ctx.arc(x,y,32,0,Math.PI*2);
-        ctx.arc(x+35,y-12,42,0,Math.PI*2);
-        ctx.arc(x+75,y,28,0,Math.PI*2);
-        ctx.fill();
+        if(p.life<=0){
+            particles.splice(i,1);
+        }
     }
+}
 
-    // island
-    ctx.fillStyle = "#53b66a";
-    ctx.beginPath();
+/* =========================================================
+   CAMERA
+========================================================= */
 
-    ctx.ellipse(
-        450,
-        540,
-        570,
-        240,
-        -.08,
-        0,
-        Math.PI*2
-    );
+function updateCamera(){
 
-    ctx.fill();
-
-    // water
-    ctx.strokeStyle = "rgba(255,255,255,.18)";
-    ctx.lineWidth = 7;
-
-    for(let i=0;i<8;i++) {
-        ctx.beginPath();
-        ctx.moveTo(0,540+i*24);
-        ctx.quadraticCurveTo(
-            220,
-            520+i*30,
-            500,
-            550+i*25
+    camera.x=
+        Math.max(
+            0,
+            Math.min(
+                MAP_W-VIEW_W,
+                player.x-VIEW_W/2
+            )
         );
+
+    camera.y=
+        Math.max(
+            0,
+            Math.min(
+                MAP_H-VIEW_H,
+                player.y-VIEW_H/2
+            )
+        );
+}
+
+/* =========================================================
+   DRAW WORLD
+========================================================= */
+
+function drawWorld(){
+
+    ctx.fillStyle="#58bdd5";
+    ctx.fillRect(0,0,VIEW_W,VIEW_H);
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    /* island */
+
+    ctx.fillStyle="#72c86f";
+
+    ctx.beginPath();
+    ctx.roundRect(
+        35,
+        35,
+        MAP_W-70,
+        MAP_H-70,
+        150
+    );
+    ctx.fill();
+
+    /* grass */
+
+    for(let i=0;i<150;i++){
+
+        const x=
+            80+
+            (i*731)%(MAP_W-160);
+
+        const y=
+            80+
+            (i*421)%(MAP_H-160);
+
+        ctx.strokeStyle=
+            i%2
+            ? "#48a85d66"
+            : "#91d77b55";
+
+        ctx.lineWidth=4;
+
+        ctx.beginPath();
+
+        ctx.moveTo(x,y);
+        ctx.lineTo(x+8,y-13);
+        ctx.moveTo(x+10,y);
+        ctx.lineTo(x+16,y-11);
+
         ctx.stroke();
     }
 
-    // logo
-    shadowText(
-        "BATTLELANDS",
-        450,
-        155,
-        72,
-        "#fff",
-        "center"
-    );
+    /* roads */
 
-    shadowText(
-        "ROYALE",
-        450,
-        225,
-        68,
-        "#ffd94b",
-        "center"
-    );
+    const road=[
+        [100,1120],
+        [700,1060],
+        [1400,1110],
+        [2200,1000],
+        [3300,1090]
+    ];
 
-    text(
-        "SEASON 1 • GLOBAL LAUNCH",
-        450,
-        278,
-        18,
-        "#fff",
-        "center",
-        900
-    );
+    ctx.lineCap="round";
 
-    // character
-    drawCharacter(
-        420,
-        455,
-        1.8,
-        "#3f72a4",
-        "GIBBONS"
-    );
+    ctx.strokeStyle="#c6ad75";
+    ctx.lineWidth=65;
 
-    // character platform
-    ctx.fillStyle = "rgba(0,0,0,.16)";
     ctx.beginPath();
-    ctx.ellipse(420,555,105,25,0,0,Math.PI*2);
-    ctx.fill();
+    ctx.moveTo(road[0][0],road[0][1]);
 
-    // player card
-    roundRect(
-        42,
-        570,
-        360,
-        102,
-        14,
-        "rgba(15,38,49,.86)"
-    );
+    for(let i=1;i<road.length;i++){
+        ctx.lineTo(
+            road[i][0],
+            road[i][1]
+        );
+    }
 
-    text(
-        "GIBBONS",
-        70,
-        598,
-        25,
-        "#fff"
-    );
-
-    text(
-        "PRIVATE • LEVEL " + saved.level,
-        70,
-        632,
-        16,
-        "#9ed6e6"
-    );
-
-    text(
-        "SEASON 1",
-        375,
-        632,
-        13,
-        "#ffda4b",
-        "right"
-    );
-}
-
-/* ------------------------------------------------------------
-   Character drawing
------------------------------------------------------------- */
-
-function drawCharacter(x,y,s,color,name="") {
-
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.scale(s,s);
-
-    // shadow
-    ctx.fillStyle = "rgba(0,0,0,.22)";
-    ctx.beginPath();
-    ctx.ellipse(0,35,25,9,0,0,Math.PI*2);
-    ctx.fill();
-
-    // legs
-    ctx.fillStyle = "#283847";
-    ctx.fillRect(-13,15,10,24);
-    ctx.fillRect(3,15,10,24);
-
-    // body
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(-24,-15,48,40,13);
-    ctx.fill();
-
-    // arms
-    ctx.fillStyle = "#efb28a";
-    ctx.beginPath();
-    ctx.arc(-28,0,8,0,Math.PI*2);
-    ctx.arc(28,0,8,0,Math.PI*2);
-    ctx.fill();
-
-    // neck
-    ctx.fillStyle = "#efb28a";
-    ctx.fillRect(-7,-26,14,14);
-
-    // head
-    ctx.fillStyle = "#efb28a";
-    ctx.beginPath();
-    ctx.arc(0,-40,22,0,Math.PI*2);
-    ctx.fill();
-
-    // hair
-    ctx.fillStyle = "#503827";
-    ctx.beginPath();
-    ctx.arc(0,-48,22,Math.PI,Math.PI*2);
-    ctx.fill();
-
-    // eyes
-    ctx.fillStyle = "#1a2830";
-    ctx.beginPath();
-    ctx.arc(-7,-39,3,0,Math.PI*2);
-    ctx.arc(7,-39,3,0,Math.PI*2);
-    ctx.fill();
-
-    // gun
-    ctx.strokeStyle = "#2a3035";
-    ctx.lineWidth = 7;
-    ctx.beginPath();
-    ctx.moveTo(18,-3);
-    ctx.lineTo(48,-13);
     ctx.stroke();
 
-    ctx.restore();
-}
+    ctx.strokeStyle="#ead394";
+    ctx.lineWidth=42;
 
-/* ------------------------------------------------------------
-   Season pass
------------------------------------------------------------- */
-
-let passScroll = 0;
-
-function drawPass() {
-
-    const g = ctx.createLinearGradient(0,0,W,H);
-    g.addColorStop(0,"#16455a");
-    g.addColorStop(1,"#091c29");
-
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    text(
-        "CLUB ROYALE",
-        W/2,
-        58,
-        42,
-        "#ffd449",
-        "center",
-        1000
-    );
-
-    text(
-        "SEASON 1",
-        W/2,
-        98,
-        18,
-        "#a9d7e6",
-        "center"
-    );
-
-    text(
-        "GLOBAL LAUNCH",
-        W/2,
-        126,
-        14,
-        "#6d9aaa",
-        "center"
-    );
-
-    // Progress
-    const progress = clamp(saved.level/50,0,1);
-
-    roundRect(
-        160,
-        160,
-        960,
-        18,
-        9,
-        "#183747"
-    );
-
-    roundRect(
-        160,
-        160,
-        960*progress,
-        18,
-        9,
-        "#f6c843"
-    );
-
-    text(
-        `LEVEL ${saved.level} / 50`,
-        640,
-        198,
-        17,
-        "#fff",
-        "center"
-    );
-
-    const cardW = 190;
-    const cardH = 280;
-    const gap = 18;
-
-    const first = Math.floor(passScroll / (cardW+gap));
-
-    for(let i=0;i<6;i++) {
-
-        const index = first+i;
-
-        if(index >= 50) continue;
-
-        const x = 55+i*(cardW+gap);
-        const y = 245;
-
-        const freeReward = seasonRewards[index][0];
-        const clubReward = seasonRewards[index][1];
-
-        const unlocked = index+1 <= saved.level;
-
-        roundRect(
-            x,
-            y,
-            cardW,
-            cardH,
-            12,
-            unlocked
-                ? "#284e5e"
-                : "#172f3b"
-        );
-
-        roundRect(
-            x+12,
-            y+12,
-            cardW-24,
-            42,
-            8,
-            unlocked
-                ? "#f2c543"
-                : "#234150"
-        );
-
-        text(
-            "TIER " + (index+1),
-            x+cardW/2,
-            y+33,
-            16,
-            unlocked ? "#263744" : "#b7d0d9",
-            "center",
-            1000
-        );
-
-        // free reward
-        roundRect(
-            x+16,
-            y+72,
-            cardW-32,
-            78,
-            8,
-            "#19323f"
-        );
-
-        text(
-            "FREE",
-            x+28,
-            y+88,
-            12,
-            "#65d6ff"
-        );
-
-        text(
-            freeReward === "—" ? "•" : freeReward,
-            x+cardW/2,
-            y+123,
-            15,
-            "#fff",
-            "center",
-            800
-        );
-
-        // premium
-        roundRect(
-            x+16,
-            y+165,
-            cardW-32,
-            95,
-            8,
-            "#493c20"
-        );
-
-        text(
-            "CLUB",
-            x+28,
-            y+182,
-            12,
-            "#ffd64a"
-        );
-
-        text(
-            clubReward,
-            x+cardW/2,
-            y+220,
-            15,
-            "#ffe98a",
-            "center",
-            900
-        );
-    }
-
-    text(
-        "← / → or mouse wheel to browse rewards",
-        W/2,
-        680,
-        14,
-        "#7597a5",
-        "center"
-    );
-}
-
-/* ------------------------------------------------------------
-   Shop
------------------------------------------------------------- */
-
-function drawShop() {
-
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,"#28576b");
-    g.addColorStop(1,"#0d2632");
-
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    text(
-        "BATTLE SHOP",
-        W/2,
-        70,
-        48,
-        "#fff",
-        "center",
-        1000
-    );
-
-    const items = [
-        ["GIBBONS", "CHARACTER", 100],
-        ["MILITARY CHUTE", "PARACHUTE", 80],
-        ["RAINBOW", "EMOTE", 125]
-    ];
-
-    items.forEach((item,i) => {
-
-        const x = 180+i*315;
-
-        roundRect(
-            x,
-            180,
-            260,
-            350,
-            18,
-            "rgba(12,30,39,.85)"
-        );
-
-        drawCharacter(
-            x+130,
-            330,
-            1.6,
-            [
-                "#3f72a4",
-                "#71818b",
-                "#d95449"
-            ][i],
-            item[0]
-        );
-
-        text(
-            item[0],
-            x+130,
-            430,
-            21,
-            "#fff",
-            "center"
-        );
-
-        text(
-            item[1],
-            x+130,
-            462,
-            13,
-            "#77b8cb",
-            "center"
-        );
-
-        const b = document.createElement("div");
-
-        roundRect(
-            x+40,
-            480,
-            180,
-            45,
-            9,
-            "#31576a"
-        );
-
-        text(
-            "◆ " + item[2],
-            x+130,
-            503,
-            18,
-            "#ffd34b",
-            "center",
-            900
-        );
-    });
-}
-
-/* ------------------------------------------------------------
-   Game rendering
------------------------------------------------------------- */
-
-function drawGame() {
-
-    drawWorld();
-
-    drawZone();
-
-    drawDrops();
-
-    drawLoot();
-
-    drawBullets();
-
-    drawBots();
-
-    drawPlayer();
-
-    drawEffects();
-
-    drawGameHUD();
-
-    if (dropTime > 0) {
-        drawDropScreen();
-    }
-}
-
-/* ------------------------------------------------------------
-   World
------------------------------------------------------------- */
-
-function drawWorld() {
-
-    ctx.fillStyle = "#4cad65";
-    ctx.fillRect(0,0,W,H);
-
-    ctx.save();
-    ctx.translate(-camera.x,-camera.y);
-
-    // water border
-    ctx.fillStyle = "#50bddd";
-    ctx.fillRect(
-        0,
-        0,
-        MAP_W,
-        MAP_H
-    );
-
-    // island
-    ctx.fillStyle = "#6bc675";
     ctx.beginPath();
-    ctx.roundRect(
-        50,
-        50,
-        MAP_W-100,
-        MAP_H-100,
-        120
-    );
-    ctx.fill();
+    ctx.moveTo(road[0][0],road[0][1]);
 
-    // grass patches
-    for(let i=0;i<75;i++) {
-
-        const x = 90 + (i*397)% (MAP_W-180);
-        const y = 90 + (i*251)% (MAP_H-180);
-
-        ctx.fillStyle =
-            i%2
-                ? "rgba(48,145,78,.13)"
-                : "rgba(255,255,255,.05)";
-
-        ctx.beginPath();
-        ctx.ellipse(
-            x,
-            y,
-            85,
-            32,
-            i*.5,
-            0,
-            Math.PI*2
+    for(let i=1;i<road.length;i++){
+        ctx.lineTo(
+            road[i][0],
+            road[i][1]
         );
-        ctx.fill();
     }
 
-    // roads
-    ctx.strokeStyle = "#d4bf80";
-    ctx.lineWidth = 54;
-    ctx.lineCap = "round";
+    ctx.stroke();
 
-    const roads = [
-        [[100,1000],[1400,1050],[2900,900]],
-        [[700,100],[1100,900],[1350,1950]],
-        [[2200,100],[1900,900],[2450,1900]]
-    ];
+    /* buildings */
 
-    for(const road of roads) {
+    for(const b of buildings){
 
-        ctx.beginPath();
-        ctx.moveTo(road[0][0],road[0][1]);
+        ctx.fillStyle="#0002";
 
-        for(let i=1;i<road.length;i++) {
-            ctx.lineTo(road[i][0],road[i][1]);
-        }
-
-        ctx.stroke();
-    }
-
-    ctx.strokeStyle = "#ead79a";
-    ctx.lineWidth = 35;
-
-    for(const road of roads) {
-
-        ctx.beginPath();
-        ctx.moveTo(road[0][0],road[0][1]);
-
-        for(let i=1;i<road.length;i++) {
-            ctx.lineTo(road[i][0],road[i][1]);
-        }
-
-        ctx.stroke();
-    }
-
-    // buildings
-    for(const b of BUILDINGS) {
-
-        roundRect(
-            b.x+8,
-            b.y+10,
+        ctx.fillRect(
+            b.x+10,
+            b.y+12,
             b.w,
-            b.h,
-            12,
-            "rgba(0,0,0,.17)"
+            b.h
         );
 
-        roundRect(
+        ctx.fillStyle="#d3b277";
+
+        ctx.fillRect(
             b.x,
             b.y,
             b.w,
-            b.h,
-            12,
-            "#d0b27a"
+            b.h
         );
 
-        roundRect(
-            b.x+12,
-            b.y+12,
-            b.w-24,
-            b.h-24,
-            9,
-            "#b6d0bf"
-        );
+        ctx.fillStyle="#a9d0c4";
 
-        ctx.fillStyle = "#df5e4c";
         ctx.fillRect(
-            b.x+20,
-            b.y+20,
-            b.w-40,
-            32
+            b.x+13,
+            b.y+45,
+            b.w-26,
+            b.h-58
         );
 
-        // windows
-        ctx.fillStyle = "#65a8c2";
+        ctx.fillStyle="#d94f45";
 
-        for(let xx=b.x+35; xx<b.x+b.w-25; xx+=55) {
-            for(let yy=b.y+80; yy<b.y+b.h-25; yy+=55) {
-                ctx.fillRect(xx,yy,26,20);
+        ctx.fillRect(
+            b.x,
+            b.y,
+            b.w,
+            40
+        );
+
+        ctx.fillStyle="#5da4b8";
+
+        for(
+            let x=b.x+35;
+            x<b.x+b.w-30;
+            x+=60
+        ){
+
+            for(
+                let y=b.y+80;
+                y<b.y+b.h-30;
+                y+=55
+            ){
+
+                ctx.fillRect(
+                    x,
+                    y,
+                    28,
+                    20
+                );
             }
         }
     }
 
-    // trees
-    for(const t of TREES) {
+    /* trees */
 
-        ctx.fillStyle = "rgba(0,0,0,.13)";
+    for(const t of trees){
+
+        ctx.fillStyle="#0002";
+
         ctx.beginPath();
         ctx.ellipse(
             t.x+5,
-            t.y+8,
-            t.r+5,
-            t.r*.55,
+            t.y+10,
+            t.r+6,
+            t.r*.5,
             0,
             0,
             Math.PI*2
         );
         ctx.fill();
 
-        ctx.fillStyle = "#3d9657";
+        ctx.fillStyle="#3c9654";
+
         ctx.beginPath();
-        ctx.arc(t.x,t.y,t.r,0,Math.PI*2);
+        ctx.arc(
+            t.x,
+            t.y,
+            t.r,
+            0,
+            Math.PI*2
+        );
         ctx.fill();
 
-        ctx.fillStyle = "#62b86a";
+        ctx.fillStyle="#63b969";
+
         ctx.beginPath();
         ctx.arc(
             t.x-5,
@@ -2508,40 +1917,51 @@ function drawWorld() {
         ctx.fill();
     }
 
-    // location labels
-    for(const loc of MAP_LOCATIONS) {
+    /* location names */
 
-        text(
-            loc.name,
-            loc.x,
-            loc.y,
-            22,
-            "rgba(255,255,255,.65)",
-            "center",
-            1000
+    for(const l of locations){
+
+        ctx.font="900 22px Arial";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
+
+        ctx.fillStyle="#fff8";
+        ctx.fillText(
+            l[0],
+            l[1],
+            l[2]
         );
     }
 
     ctx.restore();
 }
 
-/* ------------------------------------------------------------
-   Zone
------------------------------------------------------------- */
+/* =========================================================
+   DRAW ZONE
+========================================================= */
 
-function drawZone() {
+function drawZone(){
 
     ctx.save();
 
-    ctx.translate(-camera.x,-camera.y);
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
 
-    // storm overlay
-    ctx.fillStyle = "rgba(69,155,213,.33)";
-    ctx.fillRect(0,0,MAP_W,MAP_H);
+    ctx.fillStyle="#5caedc55";
 
-    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillRect(
+        0,
+        0,
+        MAP_W,
+        MAP_H
+    );
+
+    ctx.globalCompositeOperation="destination-out";
 
     ctx.beginPath();
+
     ctx.arc(
         zone.x,
         zone.y,
@@ -2549,14 +1969,16 @@ function drawZone() {
         0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    ctx.globalCompositeOperation = "source-over";
+    ctx.globalCompositeOperation="source-over";
 
-    ctx.strokeStyle = "#e6f7ff";
-    ctx.lineWidth = 8;
+    ctx.strokeStyle="#d9f7ff";
+    ctx.lineWidth=7;
 
     ctx.beginPath();
+
     ctx.arc(
         zone.x,
         zone.y,
@@ -2564,419 +1986,435 @@ function drawZone() {
         0,
         Math.PI*2
     );
+
     ctx.stroke();
 
     ctx.restore();
 }
 
-/* ------------------------------------------------------------
-   Loot drawing
------------------------------------------------------------- */
+/* =========================================================
+   DRAW LOOT
+========================================================= */
 
-function drawLoot() {
+function drawLoot(){
 
     ctx.save();
-    ctx.translate(-camera.x,-camera.y);
 
-    for(const l of loot) {
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
 
-        ctx.fillStyle = "rgba(0,0,0,.2)";
+    for(const l of loot){
+
+        ctx.fillStyle="#0003";
+
         ctx.beginPath();
         ctx.ellipse(
             l.x,
-            l.y+8,
-            20,
-            7,
+            l.y+9,
+            18,
+            6,
             0,
             0,
             Math.PI*2
         );
         ctx.fill();
 
-        if(l.type === "weapon") {
+        if(l.type==="weapon"){
 
-            ctx.fillStyle = "#263238";
-            ctx.fillRect(l.x-18,l.y-6,36,12);
+            ctx.strokeStyle=
+                weapons[l.weapon].color;
 
-            ctx.fillStyle = WEAPONS[l.weapon].color;
-            ctx.fillRect(l.x-10,l.y-4,22,7);
+            ctx.lineWidth=8;
 
-            ctx.fillStyle = "#ffe36c";
             ctx.beginPath();
-            ctx.arc(l.x,l.y-15,5,0,Math.PI*2);
-            ctx.fill();
-        }
 
-        if(l.type === "ammo") {
-
-            roundRect(
-                l.x-14,
-                l.y-12,
-                28,
-                24,
-                4,
-                "#f1d96c"
-            );
-
-            text(
-                "A",
-                l.x,
-                l.y,
-                15,
-                "#283640",
-                "center",
-                1000
-            );
-        }
-
-        if(l.type === "med") {
-
-            roundRect(
+            ctx.moveTo(
                 l.x-15,
-                l.y-15,
-                30,
-                30,
-                6,
-                "#f2f2e7"
+                l.y+3
             );
 
-            text(
-                "+",
-                l.x,
-                l.y,
-                25,
-                "#df534b",
-                "center",
-                1000
+            ctx.lineTo(
+                l.x+18,
+                l.y-5
             );
-        }
 
-        if(l.type === "shield") {
+            ctx.stroke();
 
-            ctx.fillStyle = "#65c9ee";
-
-            ctx.beginPath();
-            ctx.arc(l.x,l.y,15,0,Math.PI*2);
-            ctx.fill();
-
-            text(
-                "◆",
-                l.x,
-                l.y,
-                13,
-                "#e4faff",
-                "center"
-            );
-        }
-    }
-
-    ctx.restore();
-}
-
-/* ------------------------------------------------------------
-   Supply drops
------------------------------------------------------------- */
-
-function drawDrops() {
-
-    ctx.save();
-    ctx.translate(-camera.x,-camera.y);
-
-    for(const d of drops) {
-
-        if(d.opened) continue;
-
-        ctx.strokeStyle = "rgba(255,219,65,.55)";
-        ctx.lineWidth = 3;
-
-        ctx.beginPath();
-        ctx.arc(d.x,d.y,55,0,Math.PI*2);
-        ctx.stroke();
-
-        ctx.fillStyle = "#e5e1d3";
-        ctx.fillRect(
-            d.x-26,
-            d.y-22,
-            52,
-            44
-        );
-
-        ctx.fillStyle = "#d74e42";
-        ctx.fillRect(
-            d.x-26,
-            d.y-6,
-            52,
-            12
-        );
-
-        text(
-            "DROP",
-            d.x,
-            d.y-45,
-            12,
-            "#fff",
-            "center",
-            1000
-        );
-    }
-
-    ctx.restore();
-}
-
-/* ------------------------------------------------------------
-   Bullets
------------------------------------------------------------- */
-
-function drawBullets() {
-
-    ctx.save();
-    ctx.translate(-camera.x,-camera.y);
-
-    for(const b of bullets) {
-
-        ctx.strokeStyle = b.color;
-        ctx.lineWidth = b.radius*2;
-
-        ctx.beginPath();
-        ctx.moveTo(
-            b.x - b.vx*.015,
-            b.y - b.vy*.015
-        );
-        ctx.lineTo(b.x,b.y);
-        ctx.stroke();
-
-        if(b.explosive) {
-
-            ctx.fillStyle = "#ffcf4a";
+            ctx.fillStyle="#ffe25b";
 
             ctx.beginPath();
             ctx.arc(
-                b.x,
-                b.y,
-                7,
+                l.x,
+                l.y-15,
+                5,
                 0,
                 Math.PI*2
             );
             ctx.fill();
         }
+
+        if(l.type==="supply"){
+
+            ctx.fillStyle="#e3dfd0";
+
+            ctx.fillRect(
+                l.x-24,
+                l.y-20,
+                48,
+                40
+            );
+
+            ctx.fillStyle="#d95045";
+
+            ctx.fillRect(
+                l.x-24,
+                l.y-6,
+                48,
+                12
+            );
+        }
+
+        if(l.type==="ammo"){
+
+            ctx.fillStyle="#efcf57";
+
+            ctx.fillRect(
+                l.x-12,
+                l.y-15,
+                24,
+                30
+            );
+
+            ctx.fillStyle="#594d2d";
+
+            ctx.fillRect(
+                l.x-6,
+                l.y-10,
+                12,
+                20
+            );
+        }
+
+        if(l.type==="med"){
+
+            ctx.fillStyle="#f0eee4";
+
+            ctx.fillRect(
+                l.x-15,
+                l.y-15,
+                30,
+                30
+            );
+
+            ctx.fillStyle="#dc554b";
+
+            ctx.fillRect(
+                l.x-5,
+                l.y-12,
+                10,
+                24
+            );
+
+            ctx.fillRect(
+                l.x-12,
+                l.y-5,
+                24,
+                10
+            );
+        }
+
+        if(l.type==="shield"){
+
+            ctx.fillStyle="#55c5e9";
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                l.x,
+                l.y-18
+            );
+
+            ctx.lineTo(
+                l.x+15,
+                l.y-7
+            );
+
+            ctx.lineTo(
+                l.x+10,
+                l.y+14
+            );
+
+            ctx.lineTo(
+                l.x,
+                l.y+19
+            );
+
+            ctx.lineTo(
+                l.x-10,
+                l.y+14
+            );
+
+            ctx.lineTo(
+                l.x-15,
+                l.y-7
+            );
+
+            ctx.closePath();
+            ctx.fill();
+        }
     }
 
     ctx.restore();
 }
 
-/* ------------------------------------------------------------
-   Bots
------------------------------------------------------------- */
+/* =========================================================
+   DRAW BULLETS
+========================================================= */
 
-function drawBots() {
-
-    ctx.save();
-    ctx.translate(-camera.x,-camera.y);
-
-    for(const b of bots) {
-
-        if(!b.alive) continue;
-
-        drawUnit(
-            b.x,
-            b.y,
-            b.color,
-            b.weapon,
-            false
-        );
-
-        // HP
-        ctx.fillStyle = "rgba(0,0,0,.4)";
-        ctx.fillRect(
-            b.x-22,
-            b.y-35,
-            44,
-            5
-        );
-
-        ctx.fillStyle = "#ef6254";
-        ctx.fillRect(
-            b.x-22,
-            b.y-35,
-            44*(b.hp/100),
-            5
-        );
-    }
-
-    ctx.restore();
-}
-
-/* ------------------------------------------------------------
-   Player
------------------------------------------------------------- */
-
-function drawPlayer() {
-
-    if(!player || !player.alive) return;
+function drawBullets(){
 
     ctx.save();
-    ctx.translate(-camera.x,-camera.y);
 
-    drawUnit(
-        player.x,
-        player.y,
-        "#3f72a4",
-        player.weapon,
-        true
+    ctx.translate(
+        -camera.x,
+        -camera.y
     );
 
+    for(const b of bullets){
+
+        ctx.strokeStyle=b.color;
+        ctx.lineWidth=5;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            b.x-b.vx*.012,
+            b.y-b.vy*.012
+        );
+
+        ctx.lineTo(
+            b.x,
+            b.y
+        );
+
+        ctx.stroke();
+    }
+
     ctx.restore();
 }
 
-function drawUnit(x,y,color,weapon,isPlayer) {
+/* =========================================================
+   DRAW CHARACTER
+========================================================= */
 
-    // shadow
-    ctx.fillStyle = "rgba(0,0,0,.22)";
+function character(x,y,color,playerCharacter=false){
+
+    /* shadow */
+
+    ctx.fillStyle="#0003";
+
     ctx.beginPath();
+
     ctx.ellipse(
         x,
-        y+18,
+        y+20,
         25,
         9,
         0,
         0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    // body
-    ctx.fillStyle = color;
+    /* body */
+
+    ctx.fillStyle=color;
 
     ctx.beginPath();
+
     ctx.roundRect(
         x-21,
-        y-8,
+        y-4,
         42,
-        38,
+        34,
         11
     );
+
     ctx.fill();
 
-    // head
-    ctx.fillStyle = "#efb28a";
+    /* head */
+
+    ctx.fillStyle="#efb58e";
 
     ctx.beginPath();
+
     ctx.arc(
         x,
-        y-24,
+        y-22,
         17,
         0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    // hair
-    ctx.fillStyle = "#4b3628";
+    /* hair */
+
+    ctx.fillStyle="#4b3527";
 
     ctx.beginPath();
+
     ctx.arc(
         x,
-        y-30,
+        y-29,
         17,
         Math.PI,
         Math.PI*2
     );
+
     ctx.fill();
 
-    // eyes
-    ctx.fillStyle = "#17252c";
+    /* eyes */
+
+    ctx.fillStyle="#18252c";
 
     ctx.beginPath();
-    ctx.arc(x-5,y-24,2.5,0,Math.PI*2);
-    ctx.arc(x+5,y-24,2.5,0,Math.PI*2);
+
+    ctx.arc(
+        x-5,
+        y-22,
+        2.5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        x+5,
+        y-22,
+        2.5,
+        0,
+        Math.PI*2
+    );
+
     ctx.fill();
 
-    // weapon
-    if(weapon !== "fists") {
+    if(playerCharacter){
 
-        ctx.strokeStyle =
-            WEAPONS[weapon].color;
-
-        ctx.lineWidth = 7;
+        ctx.strokeStyle="#fff";
+        ctx.lineWidth=2;
 
         ctx.beginPath();
 
-        ctx.moveTo(
-            x+10,
-            y-1
-        );
-
-        ctx.lineTo(
-            x+35,
-            y-9
+        ctx.arc(
+            x,
+            y,
+            31,
+            0,
+            Math.PI*2
         );
 
         ctx.stroke();
     }
-
-    if(isPlayer) {
-
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 2;
-
-        ctx.beginPath();
-        ctx.arc(x,y,31,0,Math.PI*2);
-        ctx.stroke();
-    }
 }
 
-/* ------------------------------------------------------------
-   Effects
------------------------------------------------------------- */
+/* =========================================================
+   DRAW BOTS
+========================================================= */
 
-function updateParticles(dt) {
-
-    for(let i=particles.length-1;i>=0;i--) {
-
-        const p = particles[i];
-
-        p.x += p.vx*dt;
-        p.y += p.vy*dt;
-
-        p.vx *= .95;
-        p.vy *= .95;
-
-        p.life -= dt;
-
-        if(p.life <= 0) {
-            particles.splice(i,1);
-        }
-    }
-}
-
-function updateTexts(dt) {
-
-    for(let i=texts.length-1;i>=0;i--) {
-
-        const t = texts[i];
-
-        t.y -= 25*dt;
-        t.life -= dt;
-
-        if(t.life <= 0) {
-            texts.splice(i,1);
-        }
-    }
-}
-
-function drawEffects() {
+function drawBots(){
 
     ctx.save();
-    ctx.translate(-camera.x,-camera.y);
 
-    for(const p of particles) {
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
 
-        ctx.globalAlpha =
-            clamp(p.life/p.max,0,1);
+    for(const b of bots){
 
-        ctx.fillStyle = p.color;
+        if(!b.alive)continue;
+
+        character(
+            b.x,
+            b.y,
+            b.color,
+            false
+        );
+
+        /* health */
+
+        ctx.fillStyle="#0006";
+
+        ctx.fillRect(
+            b.x-20,
+            b.y-39,
+            40,
+            5
+        );
+
+        ctx.fillStyle="#e75b52";
+
+        ctx.fillRect(
+            b.x-20,
+            b.y-39,
+            40*(b.hp/100),
+            5
+        );
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   DRAW PLAYER
+========================================================= */
+
+function drawPlayer(){
+
+    if(!player.alive)return;
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    character(
+        player.x,
+        player.y,
+        "#3f79a8",
+        true
+    );
+
+    ctx.restore();
+}
+
+/* =========================================================
+   DRAW PARTICLES
+========================================================= */
+
+function drawParticles(){
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    for(const p of particles){
+
+        ctx.globalAlpha=
+            Math.max(0,p.life/.8);
+
+        ctx.fillStyle=p.color;
 
         ctx.beginPath();
+
         ctx.arc(
             p.x,
             p.y,
@@ -2984,231 +2422,37 @@ function drawEffects() {
             0,
             Math.PI*2
         );
+
         ctx.fill();
     }
 
-    for(const t of texts) {
-
-        ctx.globalAlpha =
-            clamp(t.life,0,1);
-
-        shadowText(
-            t.text,
-            t.x,
-            t.y,
-            14,
-            t.color,
-            "center"
-        );
-    }
-
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha=1;
 
     ctx.restore();
 }
 
-/* ------------------------------------------------------------
-   HUD
------------------------------------------------------------- */
+/* =========================================================
+   MINIMAP
+========================================================= */
 
-function drawGameHUD() {
+function drawMinimap(){
 
-    // top left
-    roundRect(
-        20,
-        18,
-        230,
-        92,
-        12,
-        "rgba(14,31,40,.72)"
-    );
+    const w=370;
+    const h=260;
 
-    text(
-        "ALIVE",
-        38,
-        42,
-        13,
-        "#9ec4d1"
-    );
+    mctx.fillStyle="#53aa67";
+    mctx.fillRect(0,0,w,h);
 
-    text(
-        aliveCount(),
-        38,
-        73,
-        29,
-        "#fff"
-    );
+    const sx=w/MAP_W;
+    const sy=h/MAP_H;
 
-    text(
-        "ELIMS",
-        112,
-        42,
-        13,
-        "#9ec4d1"
-    );
+    /* buildings */
 
-    text(
-        player.kills,
-        112,
-        73,
-        29,
-        "#ffd94d"
-    );
+    mctx.fillStyle="#c9a96f";
 
-    text(
-        "TIME",
-        175,
-        42,
-        13,
-        "#9ec4d1"
-    );
+    for(const b of buildings){
 
-    text(
-        Math.max(
-            0,
-            Math.floor(180-gameTime)
-        ),
-        175,
-        73,
-        25,
-        "#fff"
-    );
-
-    // minimap
-    drawMiniMap();
-
-    // bottom weapon
-    roundRect(
-        20,
-        H-118,
-        280,
-        92,
-        13,
-        "rgba(14,31,40,.82)"
-    );
-
-    text(
-        player.weapon === "fists"
-            ? "FISTS"
-            : WEAPONS[player.weapon].name,
-        38,
-        H-88,
-        19,
-        "#fff"
-    );
-
-    text(
-        player.weapon === "fists"
-            ? "∞"
-            : player.ammo,
-        38,
-        H-51,
-        31,
-        "#ffd94d",
-        "left",
-        1000
-    );
-
-    // health
-    drawBar(
-        130,
-        H-83,
-        145,
-        15,
-        player.hp,
-        "#e95b51"
-    );
-
-    drawBar(
-        130,
-        H-54,
-        145,
-        15,
-        player.shield,
-        "#52bfe7"
-    );
-
-    // storm warning
-    if(outsideZone(player)) {
-
-        roundRect(
-            W/2-100,
-            22,
-            200,
-            42,
-            10,
-            "rgba(44,132,185,.82)"
-        );
-
-        text(
-            "⚠ STORM!",
-            W/2,
-            43,
-            19,
-            "#fff",
-            "center",
-            1000
-        );
-    }
-}
-
-function drawBar(x,y,w,h,value,color) {
-
-    roundRect(
-        x,
-        y,
-        w,
-        h,
-        h/2,
-        "rgba(0,0,0,.4)"
-    );
-
-    roundRect(
-        x,
-        y,
-        w*(value/100),
-        h,
-        h/2,
-        color
-    );
-}
-
-function drawMiniMap() {
-
-    const mw = 185;
-    const mh = 125;
-    const x = W-mw-22;
-    const y = 20;
-
-    roundRect(
-        x,
-        y,
-        mw,
-        mh,
-        10,
-        "rgba(18,40,48,.82)"
-    );
-
-    ctx.save();
-
-    ctx.translate(x+8,y+8);
-
-    const sx = (mw-16)/MAP_W;
-    const sy = (mh-16)/MAP_H;
-
-    ctx.fillStyle = "#67b96e";
-    ctx.fillRect(
-        0,
-        0,
-        mw-16,
-        mh-16
-    );
-
-    // buildings
-    ctx.fillStyle = "#c9ad79";
-
-    for(const b of BUILDINGS) {
-        ctx.fillRect(
+        mctx.fillRect(
             b.x*sx,
             b.y*sy,
             b.w*sx,
@@ -3216,13 +2460,14 @@ function drawMiniMap() {
         );
     }
 
-    // zone
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
+    /* zone */
 
-    ctx.beginPath();
+    mctx.strokeStyle="#fff";
+    mctx.lineWidth=3;
 
-    ctx.arc(
+    mctx.beginPath();
+
+    mctx.arc(
         zone.x*sx,
         zone.y*sy,
         zone.r*sx,
@@ -3230,209 +2475,574 @@ function drawMiniMap() {
         Math.PI*2
     );
 
-    ctx.stroke();
+    mctx.stroke();
 
-    // enemies
-    for(const b of bots) {
+    /* enemies */
 
-        if(!b.alive) continue;
+    mctx.fillStyle="#e7554c";
 
-        ctx.fillStyle = "#ef6558";
+    for(const b of bots){
 
-        ctx.fillRect(
-            b.x*sx-1,
-            b.y*sy-1,
-            3,
-            3
+        if(!b.alive)continue;
+
+        mctx.fillRect(
+            b.x*sx-2,
+            b.y*sy-2,
+            4,
+            4
         );
     }
 
-    // player
-    ctx.fillStyle = "#fff";
+    /* player */
 
-    ctx.beginPath();
+    mctx.fillStyle="#fff";
 
-    ctx.arc(
+    mctx.beginPath();
+
+    mctx.arc(
         player.x*sx,
         player.y*sy,
-        4,
+        6,
         0,
         Math.PI*2
     );
 
+    mctx.fill();
+}
+
+/* =========================================================
+   HUD
+========================================================= */
+
+function updateHUD(){
+
+    const alive=
+        bots.filter(b=>b.alive).length+(
+            player.alive?1:0
+        );
+
+    aliveText.textContent=alive;
+    killsText.textContent=player.kills;
+
+    const remaining=
+        Math.max(
+            0,
+            300-Math.floor(matchTime)
+        );
+
+    const mins=
+        Math.floor(remaining/60);
+
+    const secs=
+        String(remaining%60).padStart(2,"0");
+
+    timeText.textContent=
+        mins+":"+secs;
+
+    weaponText.textContent=
+        player.weapon
+        ? weapons[player.weapon].name
+        : "NO WEAPON";
+
+    ammoText.textContent=
+        player.weapon
+        ? player.ammo
+        : "—";
+
+    hpBar.style.width=
+        Math.max(0,player.hp)+"%";
+
+    shieldBar.style.width=
+        Math.max(0,player.shield)+"%";
+}
+
+/* =========================================================
+   DROP PHASE
+========================================================= */
+
+function updateDrop(dt){
+
+    dropTimer-=dt;
+
+    /* During the original-style drop phase,
+       player can move the intended landing position. */
+
+    let dx=0;
+    let dy=0;
+
+    if(keys.w||keys.arrowup)dy--;
+    if(keys.s||keys.arrowdown)dy++;
+    if(keys.a||keys.arrowleft)dx--;
+    if(keys.d||keys.arrowright)dx++;
+
+    player.dropX+=dx*300*dt;
+    player.dropY+=dy*300*dt;
+
+    player.dropX=
+        Math.max(
+            100,
+            Math.min(
+                MAP_W-100,
+                player.dropX
+            )
+        );
+
+    player.dropY=
+        Math.max(
+            100,
+            Math.min(
+                MAP_H-100,
+                player.dropY
+            )
+        );
+
+    player.x=player.dropX;
+    player.y=player.dropY;
+
+    updateCamera();
+
+    if(dropTimer<=0){
+
+        state="game";
+
+        dropUI.style.display="none";
+
+        matchTime=0;
+    }
+}
+
+/* =========================================================
+   DRAW DROP
+========================================================= */
+
+function drawDrop(){
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    /* marker */
+
+    ctx.strokeStyle="#fff";
+    ctx.lineWidth=4;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.dropX,
+        player.dropY,
+        45,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        player.dropX-60,
+        player.dropY
+    );
+
+    ctx.lineTo(
+        player.dropX+60,
+        player.dropY
+    );
+
+    ctx.moveTo(
+        player.dropX,
+        player.dropY-60
+    );
+
+    ctx.lineTo(
+        player.dropX,
+        player.dropY+60
+    );
+
+    ctx.stroke();
+
+    /* parachute */
+
+    ctx.fillStyle="#eee7d3";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.x,
+        player.y-75,
+        55,
+        Math.PI,
+        Math.PI*2
+    );
+
     ctx.fill();
+
+    ctx.strokeStyle="#db5047";
+    ctx.lineWidth=4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        player.x-48,
+        player.y-75
+    );
+
+    ctx.lineTo(
+        player.x-15,
+        player.y-10
+    );
+
+    ctx.moveTo(
+        player.x+48,
+        player.y-75
+    );
+
+    ctx.lineTo(
+        player.x+15,
+        player.y-10
+    );
+
+    ctx.stroke();
 
     ctx.restore();
 }
 
-/* ------------------------------------------------------------
-   Drop screen
------------------------------------------------------------- */
+/* =========================================================
+   UPDATE
+========================================================= */
 
-function drawDropScreen() {
+function update(dt){
 
-    // dark transparent overlay
-    ctx.fillStyle = "rgba(5,30,42,.12)";
-    ctx.fillRect(0,0,W,H);
+    updateParticles(dt);
 
-    // landing marker
-    const sx = landing.x-camera.x;
-    const sy = landing.y-camera.y;
+    if(state==="menu"){
+        return;
+    }
 
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 4;
+    if(state==="drop"){
+
+        updateDrop(dt);
+        updateHUD();
+        return;
+    }
+
+    if(state!=="game"){
+        return;
+    }
+
+    matchTime+=dt;
+
+    updatePlayer(dt);
+    updateBots(dt);
+    updateBullets(dt);
+    updateZone();
+
+    updateCamera();
+    updateHUD();
+
+    if(
+        player.alive &&
+        bots.filter(b=>b.alive).length===0
+    ){
+
+        endGame(true);
+    }
+
+    if(
+        matchTime>300 &&
+        player.alive
+    ){
+
+        endGame(true);
+    }
+}
+
+/* =========================================================
+   END
+========================================================= */
+
+function endGame(win){
+
+    if(state==="result")return;
+
+    state="result";
+
+    result.style.display="flex";
+
+    document.getElementById("resultTitle")
+        .textContent=
+        win
+        ? "VICTORY!"
+        : "ELIMINATED";
+
+    document.getElementById("resultText")
+        .innerHTML=
+        `ELIMINATIONS: ${player.kills}<br>`+
+        `${win ? "1ST PLACE" : "BETTER LUCK NEXT TIME"}`;
+
+    touch.style.display="none";
+    hud.style.display="none";
+}
+
+/* =========================================================
+   DRAW
+========================================================= */
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        VIEW_W,
+        VIEW_H
+    );
+
+    if(state==="menu"){
+
+        drawMenuBackground();
+        return;
+    }
+
+    if(
+        state==="drop"||
+        state==="game"||
+        state==="result"
+    ){
+
+        drawWorld();
+        drawZone();
+        drawLoot();
+        drawBullets();
+        drawBots();
+        drawPlayer();
+        drawParticles();
+
+        if(state==="drop"){
+            drawDrop();
+        }
+
+        if(state==="game"){
+            drawCrosshair();
+        }
+
+        if(state==="game"){
+            drawMinimap();
+        }
+
+        return;
+    }
+}
+
+/* =========================================================
+   MENU BACKGROUND
+========================================================= */
+
+function drawMenuBackground(){
+
+    const sky=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            VIEW_H
+        );
+
+    sky.addColorStop(
+        0,
+        "#5bc1df"
+    );
+
+    sky.addColorStop(
+        1,
+        "#c7e7bd"
+    );
+
+    ctx.fillStyle=sky;
+
+    ctx.fillRect(
+        0,
+        0,
+        VIEW_W,
+        VIEW_H
+    );
+
+    /* clouds */
+
+    for(let i=0;i<8;i++){
+
+        const x=
+            100+
+            i*180;
+
+        const y=
+            120+
+            (i%3)*55;
+
+        ctx.fillStyle="#ffffff99";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            30,
+            0,
+            Math.PI*2
+        );
+
+        ctx.arc(
+            x+30,
+            y-10,
+            38,
+            0,
+            Math.PI*2
+        );
+
+        ctx.arc(
+            x+70,
+            y,
+            25,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    /* island */
+
+    ctx.fillStyle="#61b968";
 
     ctx.beginPath();
-    ctx.arc(sx,sy,42,0,Math.PI*2);
-    ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(sx-55,sy);
-    ctx.lineTo(sx+55,sy);
-    ctx.moveTo(sx,sy-55);
-    ctx.lineTo(sx,sy+55);
-    ctx.stroke();
-
-    roundRect(
-        W/2-220,
-        90,
-        440,
-        100,
-        16,
-        "rgba(12,34,44,.82)"
-    );
-
-    text(
-        "CHOOSE YOUR DROP",
-        W/2,
-        120,
-        27,
-        "#fff",
-        "center",
-        1000
-    );
-
-    text(
-        "PARACHUTING...",
-        W/2,
-        157,
-        19,
-        "#ffd34c",
-        "center",
-        900
-    );
-
-    text(
-        Math.ceil(dropTime),
-        W/2,
+    ctx.ellipse(
+        430,
+        560,
+        570,
         230,
-        55,
-        "#fff",
-        "center",
-        1000
-    );
-
-    // parachute
-    ctx.fillStyle = "#e8e4d2";
-
-    ctx.beginPath();
-    ctx.arc(
-        W/2,
-        300,
-        65,
-        Math.PI,
+        -.08,
+        0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    ctx.strokeStyle = "#d94d43";
-    ctx.lineWidth = 5;
+    /* character */
+
+    character(
+        420,
+        470,
+        "#3f79a8",
+        true
+    );
+
+    /* weapon */
+
+    ctx.strokeStyle="#4a5257";
+    ctx.lineWidth=10;
 
     ctx.beginPath();
-    ctx.moveTo(W/2-55,300);
-    ctx.lineTo(W/2-18,370);
-    ctx.moveTo(W/2+55,300);
-    ctx.lineTo(W/2+18,370);
+
+    ctx.moveTo(
+        440,
+        470
+    );
+
+    ctx.lineTo(
+        500,
+        450
+    );
+
     ctx.stroke();
 }
 
-/* ------------------------------------------------------------
-   Drawing main screen
------------------------------------------------------------- */
+/* =========================================================
+   CROSSHAIR
+========================================================= */
 
-function draw() {
+function drawCrosshair(){
 
-    if(screen === "menu") {
-        drawMenu();
-    }
+    if("ontouchstart" in window)return;
 
-    else if(screen === "pass") {
-        drawPass();
-    }
+    ctx.strokeStyle="#fff";
+    ctx.lineWidth=2;
 
-    else if(screen === "shop") {
-        drawShop();
-    }
+    ctx.beginPath();
 
-    else if(screen === "game") {
-        drawGame();
-    }
+    ctx.arc(
+        mouse.x,
+        mouse.y,
+        10,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        mouse.x-17,
+        mouse.y
+    );
+
+    ctx.lineTo(
+        mouse.x-6,
+        mouse.y
+    );
+
+    ctx.moveTo(
+        mouse.x+6,
+        mouse.y
+    );
+
+    ctx.lineTo(
+        mouse.x+17,
+        mouse.y
+    );
+
+    ctx.moveTo(
+        mouse.x,
+        mouse.y-17
+    );
+
+    ctx.lineTo(
+        mouse.x,
+        mouse.y-6
+    );
+
+    ctx.moveTo(
+        mouse.x,
+        mouse.y+6
+    );
+
+    ctx.lineTo(
+        mouse.x,
+        mouse.y+17
+    );
+
+    ctx.stroke();
 }
 
-/* ------------------------------------------------------------
-   Mouse wheel for battle pass
------------------------------------------------------------- */
+/* =========================================================
+   LOOP
+========================================================= */
 
-canvas.addEventListener("wheel", e => {
+let last=performance.now();
 
-    if(screen !== "pass") return;
+function loop(now){
 
-    passScroll += e.deltaY;
+    const dt=
+        Math.min(
+            .033,
+            (now-last)/1000
+        );
 
-    passScroll = clamp(
-        passScroll,
-        0,
-        44*(190+18)
-    );
-});
-
-/* ------------------------------------------------------------
-   Keyboard battle pass browsing
------------------------------------------------------------- */
-
-window.addEventListener("keydown", e => {
-
-    if(screen !== "pass") return;
-
-    if(e.key === "ArrowRight") {
-        passScroll += 208;
-    }
-
-    if(e.key === "ArrowLeft") {
-        passScroll -= 208;
-    }
-
-    passScroll = clamp(
-        passScroll,
-        0,
-        44*208
-    );
-});
-
-/* ------------------------------------------------------------
-   Game loop
------------------------------------------------------------- */
-
-let last = performance.now();
-
-function loop(now) {
-
-    const dt = Math.min(
-        .033,
-        (now-last)/1000
-    );
-
-    last = now;
+    last=now;
 
     update(dt);
     draw();
@@ -3442,12 +3052,31 @@ function loop(now) {
 
 requestAnimationFrame(loop);
 
-/* ------------------------------------------------------------
-   Initial screen
------------------------------------------------------------- */
+/* =========================================================
+   BUTTONS
+========================================================= */
 
-showMenu();
+document.getElementById("play")
+    .onclick=start;
+
+document.getElementById("about")
+    .onclick=()=>{
+
+        mainUI.style.display="none";
+        info.style.display="block";
+    };
+
+document.getElementById("back")
+    .onclick=()=>{
+
+        info.style.display="none";
+        mainUI.style.display="block";
+    };
+
+document.getElementById("again")
+    .onclick=start;
 
 </script>
+
 </body>
 </html>
